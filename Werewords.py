@@ -226,24 +226,29 @@ import streamlit as st
 
 import streamlit as st
 
+import streamlit as st
+
+import streamlit as st
+
 def RenderRunGameButton(r, user_id, game_id):
 
-    # 🔥 DEFINE STATE (fixes your error)
     state = r.get(f"game:{game_id}:state")
     state = state.decode() if isinstance(state, bytes) else state
 
     host = r.get(f"game:{game_id}:host")
     host = host.decode() if isinstance(host, bytes) else host
 
-    # only show button when ready + host
-    if state != "ready":
-        return
-
+    # only host sees button
     if host != user_id:
         return
 
-    if st.button("▶ Run Game"):
+    # DEBUG (keep this until working)
+    st.write("STATE:", state)
+
+    # button ALWAYS visible for host
+    disabled = (state != "ready")
+
+    if st.button("▶ Run Game", disabled=disabled):
 
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
-
