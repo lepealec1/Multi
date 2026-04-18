@@ -141,6 +141,9 @@ import streamlit as st
 import random
 
 # safe helper (prevents your error)
+import streamlit as st
+import random
+
 def safe_decode(x):
     return x.decode() if isinstance(x, bytes) else x
 
@@ -151,80 +154,68 @@ def RunGame(r, user_id, game_id):
     if not r.get(f"game:{game_id}:setup_ready"):
         return
 
-    # already running
+    # already started
     if r.get(f"game:{game_id}:state") == b"started":
         st.info("Game already running.")
         return
 
-    # 🔒 HOST CHECK (SAFE)
+    # 🔒 ONLY RUN IF HOST CLICKED BUTTON
+    run_requested = r.get(f"game:{game_id}:run_requested")
+    if not run_requested:
+        return  # silently do nothing
+
     host = safe_decode(r.get(f"game:{game_id}:host"))
 
+    # only host can trigger run
     if host != user_id:
-        st.warning("Only the host can start the game.")
+        st.warning("Only host can start the game.")
         return
 
-    # get players
-    players_key = f"game:{game_id}:players"
-    player_ids = list(r.smembers(players_key))
+    # clear request so it doesn't rerun
+    r.delete(f"game:{game_id}:run_requested")
 
-    player_ids = [safe_decode(p) for p in player_ids]
+    # get players
+    player_ids = [safe_decode(p) for p in r.smembers(f"game:{game_id}:players")]
 
     if len(player_ids) < 4:
         st.error("Not enough players.")
         return
 
-    # get settings safely
+    # settings
     raw_settings = r.hgetall(f"game:{game_id}:settings")
 
     settings = {}
     for k, v in raw_settings.items():
-        key = safe_decode(k)
-        val = safe_decode(v)
-
-        # convert numeric fields
-        if str(val).isdigit():
-            val = int(val)
-
-        settings[key] = val
+        settings[safe_decode(k)] = safe_decode(v)
 
     seer = int(settings.get("seer", 0))
     werewolves = int(settings.get("werewolves", 0))
 
-    # shuffle players for randomness
     random.shuffle(player_ids)
 
     roles = {}
-
     idx = 0
 
-    # Mayor always first player
     roles[player_ids[idx]] = "Mayor"
     idx += 1
 
-    # Seer(s)
     for _ in range(seer):
-        if idx >= len(player_ids):
-            break
-        roles[player_ids[idx]] = "Seer"
-        idx += 1
+        if idx < len(player_ids):
+            roles[player_ids[idx]] = "Seer"
+            idx += 1
 
-    # Werewolves
     for _ in range(werewolves):
-        if idx >= len(player_ids):
-            break
-        roles[player_ids[idx]] = "Werewolf"
-        idx += 1
+        if idx < len(player_ids):
+            roles[player_ids[idx]] = "Werewolf"
+            idx += 1
 
-    # Everyone else = Villager
     for i in range(idx, len(player_ids)):
         roles[player_ids[i]] = "Villager"
 
-    # store roles in Redis
     for pid, role in roles.items():
         r.hset(f"game:{game_id}:roles", pid, role)
 
-    # update state
     r.set(f"game:{game_id}:state", "started")
 
-    st.success("Game started! Roles assigned.")
+    st.success("Game started!")
     st.rerun()
