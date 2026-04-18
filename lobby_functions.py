@@ -141,10 +141,14 @@ def delete_lobby(r, user_id):
 
 import streamlit as st
 
+import streamlit as st
+
 def view_lobbies(r):
     st.subheader("🌐 Active Lobbies")
 
-    # collect all game keys
+    display_name = st.session_state.get("name", "")
+    is_admin = (display_name == "alepe")
+
     keys = r.keys("game:*:exists")
 
     if not keys:
@@ -154,21 +158,38 @@ def view_lobbies(r):
     for key in keys:
         game_id = key.split(":")[1]
 
-        players = r.smembers(f"game:{game_id}:players")
         host_id = r.get(f"game:{game_id}:host")
-
         host_name = r.hget(f"user:{host_id}", "name") if host_id else "None"
 
-        col1, col2, col3 = st.columns([2, 2, 1])
+        # 👇 PLAYER COUNT (THIS IS THE KEY ADDITION)
+        player_count = r.scard(f"game:{game_id}:players")
+
+        col1, col2, col3, col4 = st.columns([2, 2, 1, 1])
 
         with col1:
             st.write(f"🎮 **{game_id}**")
 
         with col2:
-            st.write(f"👑 Host: {host_name}")
+            st.write(f"👑 {host_name}")
 
         with col3:
+            st.write(f"👥 {player_count}")
+
+        with col4:
             if st.button("Join", key=f"join_{game_id}"):
                 st.session_state.game_id = game_id
                 r.sadd(f"game:{game_id}:players", st.session_state.user_id)
+                st.rerun()
+
+        # -------------------------
+        # ADMIN DELETE BUTTON
+        # -------------------------
+        if is_admin:
+            if st.button("🗑", key=f"del_{game_id}"):
+                r.delete(f"game:{game_id}:exists")
+                r.delete(f"game:{game_id}:host")
+                r.delete(f"game:{game_id}:players")
+                r.srem("active_lobbies", game_id)
+
+                st.success(f"Deleted {game_id}")
                 st.rerun()
