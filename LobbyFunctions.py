@@ -216,5 +216,24 @@ def SelectGame(r, user_id, game_id):
         index=options.index(current),
         key=f"game_mode_{game_id}"  # prevents Streamlit rerun conflicts
     )
+    if st.session_state.game_mode == "Werewords" and user_id == host_id:
 
-    return st.session_state.game_mode
+        players = list(r.smembers(f"game:{game_id}:players"))
+
+        # decode if needed
+        players = [
+            p.decode("utf-8") if isinstance(p, bytes) else p
+            for p in players
+        ]
+
+        mayor = st.selectbox(
+            "Select Mayor",
+            players,
+            key=f"mayor_{game_id}"
+        )
+
+        st.session_state.mayor = mayor
+
+        # optionally store in Redis
+        r.set(f"game:{game_id}:mayor", mayor)
+        return st.session_state.game_mode
