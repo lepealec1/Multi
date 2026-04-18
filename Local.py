@@ -52,6 +52,7 @@ with st.expander("Game",expanded=True):
         state = r.get(f"game:{game_id}:state")
         state = state.decode() if isinstance(state, bytes) else state
         Werewords.RenderTimer(r, user_id, game_id)
+        st.write(state)
         if state in [None, "lobby"]:
             Werewords.SelectMayor(r, user_id, game_id)
             Werewords.StartSetup(r, user_id, game_id)
@@ -63,19 +64,14 @@ with st.expander("Game",expanded=True):
             Werewords.RenderRunGameButton(r, user_id, game_id)
             Werewords.RunGame(r, user_id, game_id)
             st.rerun()
-
         # -------------------------
         # GAME STARTED PHASE
         # -------------------------
         elif state == "started":
-
             Werewords.MayorSelectWord(r, user_id, game_id)
-
-
         # -------------------------
         # WORD LOCKED PHASE
         # -------------------------
-        st.write(state)
         elif state == "word_selected":
             st.write("Werewolf")
             Werewords.RevealRoles(r, user_id, game_id)
