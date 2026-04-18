@@ -127,10 +127,12 @@ def StartSetup(r, user_id, game_id):
             "villagers": villagers
         })
 
-        r.set(f"game:{game_id}:setup_ready", 1)
+        # ✅ THIS IS WHAT YOUR BUTTON CHECKS FOR
+        r.set(f"game:{game_id}:state", "ready")
 
-        st.success("Setup saved.")
-
+        st.success("Setup saved. Game is ready.")
+        
+        
 import random
 
 import streamlit as st
