@@ -52,7 +52,7 @@ with st.expander("Game",expanded=True):
     if st.session_state.get("game_mode") == "Werewords":
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.StartSetup(r,user_id,game_id)
-
+        Werewords.RunGame(r,user_id,game_id)
 
 
 

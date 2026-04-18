@@ -134,13 +134,27 @@ def StartSetup(r, user_id, game_id):
 
 import random
 
-def RunGame(r, game_id):
+import streamlit as st
+import random
 
+def RunGame(r, user_id, game_id):
+
+    # must be setup first
     if not r.get(f"game:{game_id}:setup_ready"):
         return
 
+    # already running
     if r.get(f"game:{game_id}:state") == b"started":
         st.info("Game already running.")
+        return
+
+    # 🔒 HOST CHECK
+    host = r.get(f"game:{game_id}:host")
+    if host:
+        host = host.decode() if isinstance(host, bytes) else host
+
+    if host != user_id:
+        st.warning("Only the host can start the game.")
         return
 
     players_key = f"game:{game_id}:players"
