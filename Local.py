@@ -1,7 +1,7 @@
 import streamlit as st
 import time, admin, uuid, redis
 import functions
-import lobby_functions
+import LobbyFunctions
 
 
 # 2.2MB
@@ -19,14 +19,15 @@ r = redis.Redis(
 
 admin.clear_db(r)
 
-user_id, display_name = lobby_functions.init_user(r)
+user_id, display_name = LobbyFunctions.init_user(r)
 
-lobby_functions.create_game(r, user_id)
-lobby_functions.join_game(r, user_id)
+LobbyFunctions.create_game(r, user_id)
+LobbyFunctions.join_game(r, user_id)
 
-lobby_functions.render_lobby(r, user_id)
-lobby_functions.leave_game(r, user_id)
-lobby_functions.delete_lobby(r, user_id)
-lobby_functions.view_lobbies(r)
+LobbyFunctions.render_lobby(r, user_id)
+LobbyFunctions.leave_game(r, user_id)
+LobbyFunctions.delete_lobby(r, user_id)
+LobbyFunctions.view_lobbies(r)
+
 
 
