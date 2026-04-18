@@ -131,7 +131,6 @@ def StartSetup(r, user_id, game_id):
 
         st.success("Setup saved.")
 
-
 import random
 
 import streamlit as st
