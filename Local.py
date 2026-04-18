@@ -29,7 +29,7 @@ if current != st.session_state.last_version:
 
 
 user_id, display_name = LobbyFunctions.init_user(r)
-
+admin.clear_db(r)
 LobbyFunctions.create_game(r, user_id)
 
 LobbyFunctions.render_lobby(r, user_id)
@@ -40,4 +40,3 @@ LobbyFunctions.view_lobbies(r)
 
 
 LobbyFunctions.refresh_button()
- 
