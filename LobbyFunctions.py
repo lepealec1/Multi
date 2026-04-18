@@ -2,31 +2,34 @@ import streamlit as st
 import redis, uuid, time
 
 
-
 def init_user(r):
+    # create persistent user_id
     if "user_id" not in st.session_state:
         st.session_state.user_id = str(uuid.uuid4())[:8]
 
     user_id = st.session_state.user_id
 
+    # name state
     if "name" not in st.session_state:
         st.session_state.name = ""
 
+    # input UI
     name = st.text_input("Enter your name", value=st.session_state.name)
 
     if name:
         st.session_state.name = name
 
-    display_name = st.session_state.name if st.session_state.name else user_id
+    display_name = st.session_state.name.strip() if st.session_state.name else user_id
 
-    r.hset(f"user:{user_id}", "name", display_name)
+    # store in Redis (HASH format — consistent with your system)
+    r.hset(f"user:{user_id}", mapping={
+        "name": display_name
+    })
 
     st.write(f"👤 You are: **{display_name}**")
 
     return user_id, display_name
 
-
-import streamlit as st
 
 def create_game(r, user_id):
     st.subheader("Create Game")
