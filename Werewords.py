@@ -56,8 +56,6 @@ def SelectMayor(r, user_id, game_id):
     st.session_state.mayor = selected_name
 
     return selected_name
-import streamlit as st
-import redis
 
 import streamlit as st
 import random
@@ -68,7 +66,6 @@ def StartSetup(r, user_id, game_id):
     player_ids = list(r.smembers(players_key))
     player_count = len(player_ids)
 
-    # decode Redis bytes
     player_ids = [
         p.decode() if isinstance(p, bytes) else p
         for p in player_ids
@@ -83,10 +80,12 @@ def StartSetup(r, user_id, game_id):
         host = host.decode() if isinstance(host, bytes) else host
 
     if host != user_id:
-        st.info("Waiting for host to start setup...")
+        st.info("Waiting for host...")
         return
 
-    if r.get(f"game:{game_id}:setup_done"):
+    # prevent reopening after final start
+    if r.get(f"game:{game_id}:state") == b"started":
+        st.success("Game already started.")
         return
 
     @st.dialog("Werewords Setup")
@@ -101,52 +100,30 @@ def StartSetup(r, user_id, game_id):
             seconds = st.number_input("Seconds", 0, 59, 0)
 
         st.divider()
-        st.write("### Role Settings")
+        st.write("### Roles")
 
         seer = st.number_input("Seer", 0, player_count - 1, 1)
         werewolves = st.number_input("Werewolves", 1, player_count - 2, 1)
 
-        # Mayor is ALWAYS 1
-        mayor = 1
+        mayor = 1  # fixed
 
         villagers = player_count - (mayor + seer + werewolves)
 
         st.write(f"Mayor: **1 (fixed)**")
         st.write(f"Villagers (auto): **{villagers}**")
 
+        if villagers < 0:
+            st.error("Too many special roles.")
+            return
+
         total = mayor + seer + werewolves + villagers
 
-        if villagers < 0:
-            st.error("Too many special roles for player count.")
-            return
-
         if total != player_count:
-            st.error("Role mismatch.")
+            st.error("Roles must equal total players.")
             return
 
-        if st.button("Start Game"):
-
-            # --- RANDOM ROLE ASSIGNMENT ---
-            random.shuffle(player_ids)
-
-            roles = {}
-
-            roles[player_ids[0]] = "Mayor"
-
-            idx = 1
-
-            for _ in range(seer):
-                roles[player_ids[idx]] = "Seer"
-                idx += 1
-
-            for _ in range(werewolves):
-                roles[player_ids[idx]] = "Werewolf"
-                idx += 1
-
-            for i in range(idx, player_count):
-                roles[player_ids[i]] = "Villager"
-
-            # --- STORE IN REDIS ---
+        # Save setup but DO NOT start game yet
+        if st.button("Save Setup"):
 
             r.hset(f"game:{game_id}:settings", mapping={
                 "timer_seconds": int(minutes * 60 + seconds),
@@ -156,32 +133,39 @@ def StartSetup(r, user_id, game_id):
                 "villagers": villagers
             })
 
-            # store player roles
-            for pid, role in roles.items():
-                r.hset(f"game:{game_id}:roles", pid, role)
+            r.set(f"game:{game_id}:setup_ready", 1)
 
-            r.set(f"game:{game_id}:state", "started")
-            r.set(f"game:{game_id}:setup_done", 1)
+            st.success("Setup saved. Ready to start game!")
 
-            st.success("Game started! Roles assigned.")
-            st.rerun()
+        # 🔥 RUN GAME BUTTON (separate step)
+        if r.get(f"game:{game_id}:setup_ready"):
+
+            if st.button("▶ Run Game"):
+
+                random.shuffle(player_ids)
+
+                roles = {}
+
+                roles[player_ids[0]] = "Mayor"
+                idx = 1
+
+                for _ in range(seer):
+                    roles[player_ids[idx]] = "Seer"
+                    idx += 1
+
+                for _ in range(werewolves):
+                    roles[player_ids[idx]] = "Werewolf"
+                    idx += 1
+
+                for i in range(idx, player_count):
+                    roles[player_ids[i]] = "Villager"
+
+                for pid, role in roles.items():
+                    r.hset(f"game:{game_id}:roles", pid, role)
+
+                r.set(f"game:{game_id}:state", "started")
+
+                st.success("Game started! Roles assigned.")
+                st.rerun()
 
     setup()
-'''
-🐺 Main Roles
-Mayor
-Knows the secret word.
-Can only answer yes / no / maybe questions.
-Helps villagers guess the word (without being obvious).
-Seer
-Knows the secret word.
-Tries to subtly guide players without revealing themselves.
-Werewolves
-Usually 1–2 players.
-Know the secret word.
-Try to mislead everyone so the word isn’t guessed in time.
-Villagers
-Most of the players.
-Don’t know the word.
-Ask questions to figure it out before time runs out.
-'''
