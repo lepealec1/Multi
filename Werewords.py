@@ -1,12 +1,5 @@
 import streamlit as st
 import redis, uuid, time
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
-
-with open(WORDS_PATH, "r") as f:
-    words = [line.strip() for line in f if line.strip()]
 
 def SelectMayor(r, user_id, game_id):
 
@@ -307,7 +300,7 @@ def RunGame(r, user_id, game_id):
     # -------------------------
     # LOAD WORD LIST
     # -------------------------
-    with open("Words.txt", "r") as f:
+    with open("words.txt", "r") as f:
         words = [line.strip() for line in f if line.strip()]
 
     mayor_words = random.sample(words, min(10, len(words)))
@@ -445,75 +438,4 @@ def RenderTimer(r, game_id):
     secs = remaining % 60
 
     st.subheader(f"⏱ Time Left: {mins:02d}:{secs:02d}")
-
-
-import streamlit as st
-import random
-
-def safe_decode(x):
-    return x.decode() if isinstance(x, bytes) else x
-
-
-def MayorSelectWord(r, user_id, game_id):
-
-    state = safe_decode(r.get(f"game:{game_id}:state"))
-
-    if state != "started":
-        return
-
-    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-
-    if role != "Mayor":
-        return
-
-    st.subheader("👑 Choose the Secret Word")
-
-    # -------------------------
-    # LOAD OR GENERATE WORD SET
-    # -------------------------
-    words = r.lrange(f"game:{game_id}:mayor_words_pool", 0, -1)
-
-    if not words:
-        with open("Words.txt", "r") as f:
-            all_words = [w.strip() for w in f if w.strip()]
-
-        words = random.sample(all_words, min(10, len(all_words)))
-
-        r.delete(f"game:{game_id}:mayor_words_pool")
-        for w in words:
-            r.rpush(f"game:{game_id}:mayor_words_pool", w)
-
-    words = [safe_decode(w) for w in words]
-
-    chosen = st.selectbox("Pick a word", words)
-
-    col1, col2 = st.columns(2)
-
-    # -------------------------
-    # LOCK WORD
-    # -------------------------
-    with col1:
-        if st.button("🔒 Lock Word"):
-
-            r.set(f"game:{game_id}:secret_word", chosen)
-            r.set(f"game:{game_id}:state", "word_selected")
-
-            st.success("Word locked!")
-            st.rerun()
-
-    # -------------------------
-    # REROLL WORDS
-    # -------------------------
-    with col2:
-        if st.button("🎲 Reroll Words"):
-
-            with open("Words.txt", "r") as f:
-                all_words = [w.strip() for w in f if w.strip()]
-
-            new_words = random.sample(all_words, min(10, len(all_words)))
-
-            r.delete(f"game:{game_id}:mayor_words_pool")
-            for w in new_words:
-                r.rpush(f"game:{game_id}:mayor_words_pool", w)
-
-            st.rerun()
+    
