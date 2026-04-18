@@ -39,4 +39,5 @@ LobbyFunctions.view_lobbies(r)
 
 
 
-LobbyFunctions.refresh_button
+LobbyFunctions.refresh_button()
+ 
