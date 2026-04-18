@@ -44,5 +44,7 @@ with st.expander("Multiplier Setup",expanded=True):
 
     if game_id:
         LobbyFunctions.SelectGame(r, user_id, game_id)    
+        LobbyFunctions.SelectMayor(r, user_id, game_id)    
 
+        
 LobbyFunctions.refresh_button()
