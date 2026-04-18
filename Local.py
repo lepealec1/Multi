@@ -48,8 +48,12 @@ with st.expander("Multiplier Setup",expanded=True):
     if game_id:
         LobbyFunctions.SelectGame(r, user_id, game_id)  
 
-with st.expander("Game", expanded=True):
 
+LobbyFunctions.refresh_button()
+
+
+
+with st.expander("Game", expanded=True):
     raw_state = r.get(f"game:{game_id}:state")
     state = safe_decode(raw_state)
 
@@ -96,7 +100,7 @@ role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 st.write(role)
 
 
-LobbyFunctions.refresh_button()
+
 
 state = r.get(f"game:{game_id}:state")
 st.write("Game State:");
@@ -108,6 +112,3 @@ st.write(role);
 
 
 
-def refresh_button(label="🔄 Refresh"):
-    if st.button(label):
-        st.rerun()
