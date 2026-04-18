@@ -1,6 +1,6 @@
 import redis
 import streamlit as st
-st.write(1234)
+st.write(12345)
 
 
 r = redis.Redis(
@@ -15,5 +15,6 @@ success = r.set('foo', 'bar')
 
 result = r.get('foo')
 print(result)
+st.write(result)
 # >>> bar
 
