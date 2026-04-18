@@ -52,22 +52,20 @@ with st.expander("Game",expanded=True):
     st.write(state);
     state = state.decode() if isinstance(state, bytes) else state
     st.write(state);
-
     if st.session_state.get("game_mode") == "Werewords":
         state = r.get(f"game:{game_id}:state")
         state = state.decode() if isinstance(state, bytes) else state
+        st.write(state);
         #Werewords.RenderTimer(r, user_id, game_id)
         if state in [None, "lobby"]:
             Werewords.SelectMayor(r, user_id, game_id)
             Werewords.StartSetup(r, user_id, game_id)
-            st.rerun()
         # -------------------------
         # READY PHASE
         # -------------------------
         elif state == "ready":
             Werewords.RenderRunGameButton(r, user_id, game_id)
             Werewords.RunGame(r, user_id, game_id)
-            st.rerun()
         # -------------------------
         # GAME STARTED PHASE
         # -------------------------
@@ -78,7 +76,6 @@ with st.expander("Game",expanded=True):
         # -------------------------
         elif state == "word_selected":
             Werewords.RevealRoles(r, user_id, game_id)
-            st.rerun()
 
 
 role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
