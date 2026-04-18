@@ -1,5 +1,12 @@
 import streamlit as st
 import redis, uuid, time
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
+
+with open(WORDS_PATH, "r") as f:
+    words = [line.strip() for line in f if line.strip()]
 
 def SelectMayor(r, user_id, game_id):
 
