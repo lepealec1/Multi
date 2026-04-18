@@ -30,3 +30,4 @@ lobby_functions.delete_lobby(r, user_id)
 lobby_functions.view_lobbies(r)
 
 
+admin.admin_clear_lobby(r, user_id)
