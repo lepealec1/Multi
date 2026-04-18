@@ -179,3 +179,9 @@ def view_lobbies(r):
 
                 st.success(f"Deleted {game_id}")
                 st.rerun()
+
+
+def refresh_button(label="🔄 Refresh"):
+    if st.button(label):
+        st.rerun()
+        
