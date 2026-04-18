@@ -1,6 +1,5 @@
 import streamlit as st
 import time, uuid, redis
-import bu.functions as functions
 import LobbyFunctions
 import admin
 import Werewords
@@ -58,3 +57,6 @@ with st.expander("Game",expanded=True):
 
 LobbyFunctions.refresh_button()
 
+st.write("STATE:", state)
+st.write("HOST:", host)
+st.write("USER:", user_id)
