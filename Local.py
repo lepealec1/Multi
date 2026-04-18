@@ -1,12 +1,17 @@
 import streamlit as st
 import redis
 import uuid
-from streamlit_autorefresh import st_autorefresh
+import time
 
 # -------------------------
-# AUTO REFRESH (EVERY 5s)
+# AUTO REFRESH (every 5s)
 # -------------------------
-st_autorefresh(interval=5000, key="refresh")
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+if time.time() - st.session_state.last_refresh > 5:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
 
 # -------------------------
 # REDIS CONNECTION
@@ -33,6 +38,7 @@ if "name" not in st.session_state:
     st.session_state.name = ""
 
 name = st.text_input("Enter your name", value=st.session_state.name)
+
 if name:
     st.session_state.name = name
 
@@ -40,6 +46,7 @@ display_name = st.session_state.name if st.session_state.name else user_id
 
 st.write(f"👤 You are: **{display_name}**")
 
+# store name in redis
 r.hset(f"user:{user_id}", "name", display_name)
 
 # -------------------------
@@ -53,14 +60,14 @@ if st.button("Create Game"):
     if create_id:
         r.set(f"game:{create_id}:exists", 1)
 
-        # set host
+        # host = user_id (IMPORTANT)
         r.set(f"game:{create_id}:host", user_id)
 
-        # add creator to lobby
         r.sadd(f"game:{create_id}:players", user_id)
 
         st.session_state.game_id = create_id
         st.success(f"Created game: {create_id}")
+        st.rerun()
     else:
         st.error("Enter a Game ID")
 
@@ -76,6 +83,7 @@ if st.button("Join Game"):
         r.sadd(f"game:{join_id}:players", user_id)
         st.session_state.game_id = join_id
         st.success(f"Joined {join_id}")
+        st.rerun()
     else:
         st.error("Game not found")
 
@@ -88,13 +96,15 @@ if "game_id" in st.session_state:
     st.divider()
     st.subheader(f"🎮 Lobby: {game_id}")
 
-    host = r.get(f"game:{game_id}:host")
+    host_id = r.get(f"game:{game_id}:host")
 
     r.sadd(f"game:{game_id}:players", user_id)
 
     players = list(r.smembers(f"game:{game_id}:players"))
 
-    st.write(f"👑 Host: {r.hget(f'user:{host}', 'name') if host else host}")
+    host_name = r.hget(f"user:{host_id}", "name") if host_id else "None"
+
+    st.write(f"👑 Host: **{host_name}**")
 
     st.write("### Players")
 
@@ -105,13 +115,13 @@ if "game_id" in st.session_state:
 
         with col1:
             label = f"🟢 {pname} (you)" if p == user_id else f"⚪ {pname}"
-            if p == host:
+            if p == host_id:
                 label += " 👑"
             st.write(label)
 
         with col2:
-            # allow kick ONLY if you're host and not yourself
-            if user_id == host and p != user_id:
+            # host-only kick
+            if user_id == host_id and p != user_id:
                 if st.button("❌ Kick", key=f"kick_{p}"):
                     r.srem(f"game:{game_id}:players", p)
                     st.rerun()
@@ -124,9 +134,26 @@ if "game_id" in st.session_state:
     if st.button("🚪 Leave Game"):
         r.srem(f"game:{game_id}:players", user_id)
 
-        # if host leaves, clear host
-        if user_id == host:
+        # if host leaves, remove host
+        if user_id == host_id:
             r.delete(f"game:{game_id}:host")
 
         del st.session_state.game_id
         st.rerun()
+
+    # -------------------------
+    # DELETE LOBBY (HOST ONLY)
+    # -------------------------
+    if user_id == host_id:
+        st.subheader("🗑 Danger Zone")
+
+        confirm = st.checkbox("I understand this will delete the lobby")
+
+        if st.button("Delete Lobby"):
+            if confirm:
+                r.delete(f"game:{game_id}:exists")
+                r.delete(f"game:{game_id}:host")
+                r.delete(f"game:{game_id}:players")
+
+                del st.session_state.game_id
+                st.rerun()
