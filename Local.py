@@ -1,8 +1,8 @@
 import streamlit as st
-import time, admin, uuid, redis
+import time, uuid, redis
 import functions
 import LobbyFunctions
-
+import admin
 
 # 2.2MB
 if "name" not in st.session_state:

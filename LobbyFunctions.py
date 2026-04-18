@@ -218,42 +218,54 @@ def SelectGame(r, user_id, game_id):
 
 
 def SelectMayor(r, user_id, game_id):
+
     host_id = r.get(f"game:{game_id}:host")
-
-    if host_id is None:
-        return r.get(f"game:{game_id}:mayor")
-
     if isinstance(host_id, bytes):
         host_id = host_id.decode("utf-8")
 
-    players = r.smembers(f"game:{game_id}:players")
-    players = [
-        p.decode("utf-8") if isinstance(p, bytes) else p
-        for p in players
-    ]
+    # get player IDs
+    player_ids = r.smembers(f"game:{game_id}:players")
+
+    # convert IDs → names
+    players = []
+    id_to_name = {}
+
+    for pid in player_ids:
+        pid = pid.decode("utf-8") if isinstance(pid, bytes) else pid
+
+        name = r.get(f"user:{pid}:name")
+        name = name.decode("utf-8") if isinstance(name, bytes) else name
+
+        players.append(name)
+        id_to_name[name] = pid  # keep mapping if needed later
+
+    if user_id != host_id:
+        mayor_id = r.get(f"game:{game_id}:mayor")
+        if not mayor_id:
+            return None
+        if isinstance(mayor_id, bytes):
+            mayor_id = mayor_id.decode("utf-8")
+
+        return r.get(f"user:{mayor_id}:name")
 
     if not players:
         return None
 
-    # non-hosts just read
-    if user_id != host_id:
-        mayor = r.get(f"game:{game_id}:mayor")
-        return mayor.decode("utf-8") if isinstance(mayor, bytes) else mayor
-
     if "mayor" not in st.session_state:
-        st.session_state.mayor = None
+        st.session_state.mayor = players[0]
 
-    current = st.session_state.mayor
-    if current not in players:
-        current = players[0]
-
-    st.session_state.mayor = st.selectbox(
+    selected_name = st.selectbox(
         "Select Mayor",
         players,
-        index=players.index(current),
+        index=players.index(st.session_state.mayor) if st.session_state.mayor in players else 0,
         key=f"mayor_{game_id}"
     )
 
-    r.set(f"game:{game_id}:mayor", st.session_state.mayor)
+    # convert back name → user_id
+    selected_id = id_to_name[selected_name]
 
-    return st.session_state.mayor
+    r.set(f"game:{game_id}:mayor", selected_id)
+
+    st.session_state.mayor = selected_name
+
+    return selected_name
