@@ -138,7 +138,7 @@ if "game_id" in st.session_state:
     st.divider()
 
     if st.button("🚪 Leave Game"):
-        r.srem(f"game:{game_id}:players", user_id)s
+        r.srem(f"game:{game_id}:players", user_id)
         # if host leaves, remove host
         if user_id == host_id:
             r.delete(f"game:{game_id}:host")
