@@ -3,6 +3,8 @@ import time, uuid, redis
 import LobbyFunctions
 import admin
 import Werewords
+def safe_decode(x):
+    return x.decode() if isinstance(x, bytes) else x
 
 
 # 2.2MB
@@ -89,7 +91,7 @@ with st.expander("Game", expanded=True):
         Werewords.RevealRoles(r, user_id, game_id)
 
 
-        
+
 role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 st.write(role)
 
