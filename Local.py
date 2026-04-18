@@ -49,7 +49,7 @@ with st.expander("Multiplier Setup",expanded=True):
 with st.expander("Game", expanded=True):
 
     raw_state = r.get(f"game:{game_id}:state")
-    state = safe_decode(raw_state)
+    state = Werewords.safe_decode(raw_state)
 
     st.write("STATE:", state)
 
