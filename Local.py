@@ -26,10 +26,10 @@ if "last_tick" not in st.session_state:
     st.session_state.last_tick = time.time()
 
 if time.time() - st.session_state.last_tick > 5:
-    st.session_state.game_id=0
-    game_id = st.session_state.game_id
     st.session_state.last_tick = time.time()
-
+    game_id = st.session_state.get("game_id", None)
+    if game_id is None:
+        st.stop()
     # BUT only rerun if something changed
     players = r.scard(f"game:{game_id}:players")
 
