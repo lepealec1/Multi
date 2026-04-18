@@ -105,3 +105,9 @@ st.write(state);
 state = r.get(f"game:{game_id}:role")
 st.write("role:");
 st.write(role);
+
+
+
+def refresh_button(label="🔄 Refresh"):
+    if st.button(label):
+        st.rerun()
