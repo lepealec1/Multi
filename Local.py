@@ -13,10 +13,20 @@ import time
 import streamlit as st
 
 # only refresh occasionally
+
+
+r = redis.Redis(
+    host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
+    port=11322,
+    username="default",
+    password=st.secrets["REDIS_PASSWORD"],
+    decode_responses=True
+)
 if "last_tick" not in st.session_state:
     st.session_state.last_tick = time.time()
 
 if time.time() - st.session_state.last_tick > 5:
+    game_id = st.session_state.game_id
     st.session_state.last_tick = time.time()
 
     # BUT only rerun if something changed
@@ -28,14 +38,6 @@ if time.time() - st.session_state.last_tick > 5:
     if players != st.session_state.prev_players:
         st.session_state.prev_players = players
         st.rerun()
-
-r = redis.Redis(
-    host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
-    port=11322,
-    username="default",
-    password=st.secrets["REDIS_PASSWORD"],
-    decode_responses=True
-)
 
 admin.clear_db(r)
 
