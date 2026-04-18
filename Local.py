@@ -8,13 +8,26 @@ import LobbyFunctions
 if "name" not in st.session_state:
     st.session_state.name = ""
 
-    
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
 
-if time.time() - st.session_state.last_refresh > 5:
-    st.session_state.last_refresh = time.time()
-    st.rerun()
+import time
+import streamlit as st
+
+# only refresh occasionally
+if "last_tick" not in st.session_state:
+    st.session_state.last_tick = time.time()
+
+if time.time() - st.session_state.last_tick > 5:
+    st.session_state.last_tick = time.time()
+
+    # BUT only rerun if something changed
+    players = r.scard(f"game:{game_id}:players")
+
+    if "prev_players" not in st.session_state:
+        st.session_state.prev_players = players
+
+    if players != st.session_state.prev_players:
+        st.session_state.prev_players = players
+        st.rerun()
 
 r = redis.Redis(
     host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
