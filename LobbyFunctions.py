@@ -30,9 +30,13 @@ def init_user(r):
 
     return user_id, display_name
 
-
 def create_game(r, user_id):
     st.subheader("Create Game")
+
+    # 🚫 BLOCK if already in a lobby
+    if "game_id" in st.session_state:
+        st.warning(f"You're already in lobby: {st.session_state.game_id}")
+        return
 
     game_id = st.text_input("Game ID to create")
 
@@ -47,7 +51,6 @@ def create_game(r, user_id):
         else:
             st.error("Enter a Game ID")
 
-import streamlit as st
 
 
 def render_lobby(r, user_id):
@@ -86,7 +89,7 @@ def render_lobby(r, user_id):
                     r.srem(f"game:{game_id}:players", p)
                     st.rerun()
 
-import streamlit as st
+
 
 def leave_game(r, user_id):
     if "game_id" not in st.session_state:
@@ -104,7 +107,7 @@ def leave_game(r, user_id):
         del st.session_state.game_id
         st.rerun()
 
-import streamlit as st
+
 
 def delete_lobby(r, user_id):
     if "game_id" not in st.session_state:
@@ -218,4 +221,5 @@ def SelectGame(r, user_id, game_id):
     )
 
     return st.session_state.game_mode
+
 
