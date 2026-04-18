@@ -48,6 +48,11 @@ with st.expander("Multiplier Setup",expanded=True):
 
   
 with st.expander("Game",expanded=True):
+    state = r.get(f"game:{game_id}:state")
+    st.write(state);
+    state = state.decode() if isinstance(state, bytes) else state
+    st.write(state);
+
     if st.session_state.get("game_mode") == "Werewords":
         state = r.get(f"game:{game_id}:state")
         state = state.decode() if isinstance(state, bytes) else state

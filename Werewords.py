@@ -246,10 +246,10 @@ def RevealRoles(r, user_id, game_id):
     st.subheader("🎭 Role")
     st.write(role)
     if role == "Seer" and state == "word_selected":
-        st.info("🔮 DEBUG MODE")
+        st.write("🔮 DEBUG MODE")
         st.error(f"SECRET WORD: {secret}")
 
-        
+
     elif role == "Werewolf":
         st.warning("You are a Werewolf")
 
