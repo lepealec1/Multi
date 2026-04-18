@@ -16,7 +16,4 @@ r = redis.Redis(
     decode_responses=True
 )
 
-r.ping()
-
-#r.ping()
 st.success("Redis connected ✅")
