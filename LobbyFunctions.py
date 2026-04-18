@@ -2,33 +2,59 @@ import streamlit as st
 import redis, uuid, time
 
 
+import streamlit as st
+import uuid
+
 def init_user(r):
-    # create persistent user_id
+
+    # --- SESSION USER ID ---
     if "user_id" not in st.session_state:
-        st.session_state.user_id = str(uuid.uuid4())[:8]
+        st.session_state.user_id = None
 
-    user_id = st.session_state.user_id
-
-    # name state
-    if "name" not in st.session_state:
-        st.session_state.name = ""
-
-    # input UI
-    name = st.text_input("Enter your name", value=st.session_state.name)
+    # --- NAME INPUT ---
+    name = st.text_input("Enter your name", value=st.session_state.get("name", ""))
 
     if name:
+        name = name.strip()
         st.session_state.name = name
 
-    display_name = st.session_state.name.strip() if st.session_state.name else user_id
+        # 🔍 LOOK FOR EXISTING USER WITH THIS NAME
+        keys = r.keys("user:*")
 
-    # store in Redis (HASH format — consistent with your system)
-    r.hset(f"user:{user_id}", mapping={
-        "name": display_name
-    })
+        found_user_id = None
+
+        for key in keys:
+            user_id = key.split(":")[1]
+
+            stored_name = r.hget(f"user:{user_id}", "name")
+            stored_name = stored_name.decode() if isinstance(stored_name, bytes) else stored_name
+
+            if stored_name == name:
+                found_user_id = user_id
+                break
+
+        # ✅ EXISTING USER → LOAD IT
+        if found_user_id:
+            st.session_state.user_id = found_user_id
+
+        # 🆕 NEW USER → CREATE IT
+        else:
+            new_id = str(uuid.uuid4())[:8]
+            st.session_state.user_id = new_id
+
+            r.hset(f"user:{new_id}", mapping={
+                "name": name
+            })
+
+    # fallback display id
+    user_id = st.session_state.user_id or "unknown"
+
+    display_name = st.session_state.name.strip() if st.session_state.name else user_id
 
     st.write(f"👤 You are: **{display_name}**")
 
     return user_id, display_name
+
 
 def create_game(r, user_id):
     st.subheader("Create Game")
