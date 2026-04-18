@@ -236,27 +236,78 @@ def MayorSelectWord(r, user_id, game_id):
 # =========================
 # REVEAL ROLES
 # =========================
+import streamlit as st
+
 def RevealRoles(r, user_id, game_id):
+
     state = safe_decode(r.get(f"game:{game_id}:state"))
+
     if state != "word_selected":
         return
 
-    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+    # -------------------------
+    # SAFE ROLE FETCH (FIXED BUG)
+    # -------------------------
+    role = get_role(r, game_id, user_id)
+
     secret = safe_decode(r.get(f"game:{game_id}:secret_word"))
-    st.subheader("🎭 Role")
-    st.write(role)
-    if role == "Seer" and state == "word_selected":
-        st.write("🔮 DEBUG MODE")
-        st.error(f"SECRET WORD: {secret}")
 
+    st.subheader("🎭 Your Role")
 
+    if not role:
+        st.error("Role not found (debug: check Redis role assignment)")
+        return
+
+    st.write(f"Role: **{role}**")
+
+    # -------------------------
+    # SEER
+    # -------------------------
+    if role == "Seer":
+        st.info("🔮 You are the Seer")
+        st.write("Hint system active")
+        st.write(f"Word length: {len(secret)}")
+
+    # -------------------------
+    # WEREWOLF
+    # -------------------------
     elif role == "Werewolf":
-        st.warning("You are a Werewolf")
+        st.warning("🐺 You are a Werewolf")
 
+        players = r.hgetall(f"game:{game_id}:roles")
+        wolves = [
+            safe_decode(pid)
+            for pid, rrole in players.items()
+            if safe_decode(rrole) == "Werewolf"
+        ]
+
+        st.write("Other Werewolves:")
+        st.write(wolves)
+
+    # -------------------------
+    # VILLAGER
+    # -------------------------
     elif role == "Villager":
-        st.success("You are a Villager")
+        st.success("👤 You are a Villager")
+        st.write("Figure out the word!")
+
+    # -------------------------
+    # DEBUG MODE (OPTIONAL)
+    # -------------------------
+    elif role == "Mayor":
+        st.info("👑 Mayor View")
+        st.write("SECRET WORD (debug only):")
+        st.error(secret)
 
 
+
+
+
+def get_role(r, game_id, user_id):
+    user_id = safe_decode(user_id).strip()
+
+    raw = r.hget(f"game:{game_id}:roles", user_id)
+    return safe_decode(raw) if raw else None
 # =========================
 # TIMER
 # =========================
