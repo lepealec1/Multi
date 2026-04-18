@@ -133,17 +133,6 @@ def StartSetup(r, user_id, game_id):
         st.success("Setup saved. Game is ready.")
         
         
-import random
-
-import streamlit as st
-import random
-
-import streamlit as st
-import random
-
-# safe helper (prevents your error)
-import streamlit as st
-import random
 
 def safe_decode(x):
     return x.decode() if isinstance(x, bytes) else x

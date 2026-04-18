@@ -57,6 +57,10 @@ with st.expander("Game",expanded=True):
         Werewords.RevealRoles(r,user_id,game_id)
         Werewords.RenderTimer(r,user_id,game_id)
 
+role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+st.write(role)
+
+
 LobbyFunctions.refresh_button()
 
 state = r.get(f"game:{game_id}:state")
