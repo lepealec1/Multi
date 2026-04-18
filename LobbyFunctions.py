@@ -188,6 +188,9 @@ def refresh_button(label="🔄 Refresh"):
 def SelectGame(r, user_id, game_id):
     host_id = r.get(f"game:{game_id}:host")
 
+    if host_id:
+        host_id = host_id.decode("utf-8")
+
     # only host can see it
     if user_id != host_id:
         return st.session_state.get("game_mode", "None")
