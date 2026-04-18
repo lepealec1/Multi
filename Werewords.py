@@ -417,7 +417,7 @@ def RevealRoles(r, user_id, game_id):
         st.write("Try to figure out the word!")
 
 
-def RenderTimer(r, game_id):
+def RenderTimer(r, user_id, game_id):
 
     data = r.hgetall(f"game:{game_id}:timer")
     if not data:
