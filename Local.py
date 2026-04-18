@@ -53,6 +53,25 @@ LobbyFunctions.refresh_button()
 
 
 
+role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+st.write(role)
+
+
+
+
+state = r.get(f"game:{game_id}:state")
+st.write("Game State:");
+st.write(state);
+
+state = r.get(f"game:{game_id}:role")
+st.write("role:");
+st.write(role);
+
+
+
+
+
+
 with st.expander("Game", expanded=True):
     raw_state = r.get(f"game:{game_id}:state")
     state = safe_decode(raw_state)
@@ -79,8 +98,6 @@ with st.expander("Game", expanded=True):
     elif state == "ready":
         Werewords.RenderRunGameButton(r, user_id, game_id)
         Werewords.RunGame(r, user_id, game_id)
-
-
     # -------------------------
     # STARTED
     # -------------------------
@@ -93,22 +110,5 @@ with st.expander("Game", expanded=True):
     # -------------------------
     elif state == "word_selected":
         Werewords.RevealRoles(r, user_id, game_id)
-
-
-
-role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-st.write(role)
-
-
-
-
-state = r.get(f"game:{game_id}:state")
-st.write("Game State:");
-st.write(state);
-
-state = r.get(f"game:{game_id}:role")
-st.write("role:");
-st.write(role);
-
 
 
