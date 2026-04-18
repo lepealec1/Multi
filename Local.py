@@ -22,11 +22,12 @@ r = redis.Redis(
     password=st.secrets["REDIS_PASSWORD"],
     decode_responses=True
 )
-if "last_tick" not in st.session_state:
-    st.session_state.last_tick = time.time()
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
 
-st.autorefresh(interval=5000, key="auto_refresh")
-
+if time.time() - st.session_state.last_refresh > 5:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
 
 admin.clear_db(r)
 
