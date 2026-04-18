@@ -75,6 +75,7 @@ with st.expander("Game",expanded=True):
         # -------------------------
         # WORD LOCKED PHASE
         # -------------------------
+        st.write(state)
         elif state == "word_selected":
             st.write("Werewolf")
             Werewords.RevealRoles(r, user_id, game_id)
