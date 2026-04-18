@@ -5,6 +5,8 @@ import time, admin
 # -------------------------
 # AUTO REFRESH (every 5s)
 # -------------------------
+if "name" not in st.session_state:
+    st.session_state.name = ""
 if "last_refresh" not in st.session_state:
     st.session_state.last_refresh = time.time()
 
@@ -136,28 +138,21 @@ if "game_id" in st.session_state:
     st.divider()
 
     if st.button("🚪 Leave Game"):
-        r.srem(f"game:{game_id}:players", user_id)
-
+        r.srem(f"game:{game_id}:players", user_id)s
         # if host leaves, remove host
         if user_id == host_id:
             r.delete(f"game:{game_id}:host")
-
         del st.session_state.game_id
         st.rerun()
-
     # -------------------------
     # DELETE LOBBY (HOST ONLY)
     # -------------------------
     if user_id == host_id:
-        st.subheader("🗑 Danger Zone")
-
-        confirm = st.checkbox("I understand this will delete the lobby")
-
+        confirm = st.checkbox("I understand this will reset the lobby")
         if st.button("Delete Lobby"):
             if confirm:
                 r.delete(f"game:{game_id}:exists")
                 r.delete(f"game:{game_id}:host")
                 r.delete(f"game:{game_id}:players")
-
                 del st.session_state.game_id
                 st.rerun()
