@@ -79,7 +79,7 @@ def StartSetup(r, user_id, game_id):
     player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
     player_count = len(player_ids)
 
-    if player_count < 4:
+    if player_count < 3:
         st.warning("Need at least 4 players")
         return
 
