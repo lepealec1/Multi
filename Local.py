@@ -22,7 +22,6 @@ admin.clear_db(r)
 user_id, display_name = LobbyFunctions.init_user(r)
 
 LobbyFunctions.create_game(r, user_id)
-LobbyFunctions.join_game(r, user_id)
 
 LobbyFunctions.render_lobby(r, user_id)
 LobbyFunctions.leave_game(r, user_id)

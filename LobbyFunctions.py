@@ -46,20 +46,6 @@ def create_game(r, user_id):
 
 import streamlit as st
 
-def join_game(r, user_id):
-    st.subheader("Join Game")
-
-    join_id = st.text_input("Game ID to join")
-
-    if st.button("Join Game"):
-        if r.exists(f"game:{join_id}:exists"):
-            r.sadd(f"game:{join_id}:players", user_id)
-            st.session_state.game_id = join_id
-            st.rerun()
-        else:
-            st.error("Game not found")
-
-
 
 def render_lobby(r, user_id):
     if "game_id" not in st.session_state:
