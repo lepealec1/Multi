@@ -2,12 +2,17 @@ import streamlit as st
 import redis
 import json
 import uuid
+r = redis.Redis(
+    host=st.secrets["REDIS_HOST"],
+    port=int(st.secrets["REDIS_PORT"]),
+    password=st.secrets["REDIS_PASSWORD"],
+    ssl=True,   # IMPORTANT for Redis Cloud
+    decode_responses=True
+)
 
-# -------------------------
-# REDIS CONNECTION
-# -------------------------
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-
+# test connection
+r.ping()
+st.success("Redis connected ✅")
 # -------------------------
 # HELPERS
 # -------------------------
