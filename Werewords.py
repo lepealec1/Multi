@@ -56,3 +56,97 @@ def SelectMayor(r, user_id, game_id):
     st.session_state.mayor = selected_name
 
     return selected_name
+import streamlit as st
+import redis
+
+def StartSetup(r, user_id, game_id):
+
+    players_key = f"game:{game_id}:players"
+    player_count = r.scard(players_key)
+
+    # Must have at least 4 players
+    if player_count < 4:
+        st.warning("Need at least 4 players to start Werewords.")
+        return
+
+    # Only host can configure
+    host = r.get(f"game:{game_id}:host")
+    if host:
+        host = host.decode() if isinstance(host, bytes) else host
+
+    if host != user_id:
+        st.info("Waiting for host to start setup...")
+        return
+
+    # prevent reopening multiple times
+    if r.get(f"game:{game_id}:setup_done"):
+        return
+
+    @st.dialog("Werewords Setup")
+    def setup():
+
+        st.write(f"Players: **{player_count}**")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            minutes = st.number_input("Minutes", 0, 60, 5)
+        with col2:
+            seconds = st.number_input("Seconds", 0, 59, 0)
+
+        st.divider()
+        st.write("### Roles")
+
+        mayor = st.number_input("Mayor", 0, player_count, 1)
+        seer = st.number_input("Seer", 0, player_count, 1)
+        werewolves = st.number_input("Werewolves", 1, player_count, 1)
+
+        villagers = player_count - (mayor + seer + werewolves)
+
+        st.write(f"Villagers (auto): **{villagers}**")
+
+        total = mayor + seer + werewolves + villagers
+
+        if villagers < 0:
+            st.error("Too many special roles.")
+            return
+
+        if total != player_count:
+            st.error("Roles must equal total players.")
+            return
+
+        if st.button("Start Game"):
+
+            r.hset(f"game:{game_id}:settings", mapping={
+                "timer_seconds": int(minutes * 60 + seconds),
+                "mayor": int(mayor),
+                "seer": int(seer),
+                "werewolves": int(werewolves),
+                "villagers": int(villagers)
+            })
+
+            r.set(f"game:{game_id}:state", "started")
+            r.set(f"game:{game_id}:setup_done", 1)
+
+            st.success("Game started!")
+            st.rerun()
+
+    setup()
+
+'''
+🐺 Main Roles
+Mayor
+Knows the secret word.
+Can only answer yes / no / maybe questions.
+Helps villagers guess the word (without being obvious).
+Seer
+Knows the secret word.
+Tries to subtly guide players without revealing themselves.
+Werewolves
+Usually 1–2 players.
+Know the secret word.
+Try to mislead everyone so the word isn’t guessed in time.
+Villagers
+Most of the players.
+Don’t know the word.
+Ask questions to figure it out before time runs out.
+'''

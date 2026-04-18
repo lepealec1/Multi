@@ -1,6 +1,6 @@
 import streamlit as st
 import time, uuid, redis
-import functions
+import bu.functions as functions
 import LobbyFunctions
 import admin
 import Werewords
@@ -45,10 +45,14 @@ with st.expander("Multiplier Setup",expanded=True):
     game_id = st.session_state.get("game_id")
 
     if game_id:
-        LobbyFunctions.SelectGame(r, user_id, game_id)    
-    if st.session_state.get("game_mode") == "Werewords":
-        Werewords.SelectMayor(r, user_id, game_id)    
+        LobbyFunctions.SelectGame(r, user_id, game_id)  
 
+  
+with st.expander("Game",expanded=True):
+    if st.session_state.get("game_mode") == "Werewords":
+        Werewords.SelectMayor(r, user_id, game_id)
+        Werewords.SetupGame(r,user_id,game_id)
+    w
 
 LobbyFunctions.refresh_button()
 

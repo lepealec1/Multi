@@ -1,8 +1,7 @@
 import streamlit as st
 import redis, uuid, time
 
-
-#ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "admin123")
+ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "a")
 def clear_db(r):
     display_name = st.session_state.name
     if display_name == "alepe":

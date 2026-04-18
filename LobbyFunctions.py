@@ -131,9 +131,6 @@ def delete_lobby(r, user_id):
             st.rerun()
             
 
-import streamlit as st
-
-import streamlit as st
 
 def view_lobbies(r):
     st.subheader("🌐 Active Lobbies")
