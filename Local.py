@@ -90,7 +90,9 @@ with st.expander("Game",expanded=True):
         # -------------------------
         elif state == "word_selected":
 
-            Werewords.RevealRoles(r, user_id, game_id)role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+            Werewords.RevealRoles(r, user_id, game_id)
+
+role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 st.write(role)
 
 
