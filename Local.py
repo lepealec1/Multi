@@ -50,8 +50,11 @@ with st.expander("Multiplier Setup",expanded=True):
 with st.expander("Game",expanded=True):
     if st.session_state.get("game_mode") == "Werewords":
         state = r.get(f"game:{game_id}:state")
+        st.write("Sttate1:")
+        st.write(state)
         state = state.decode() if isinstance(state, bytes) else state
         Werewords.RenderTimer(r, user_id, game_id)
+        st.write("Sttate:")
         st.write(state)
         if state in [None, "lobby"]:
             Werewords.SelectMayor(r, user_id, game_id)
