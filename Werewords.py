@@ -95,7 +95,7 @@ def StartSetup(r, user_id, game_id):
     with col1:
         minutes = st.number_input("Minutes", 0, 60, 5, key=f"{game_id}_min")
     with col2:
-        seconds = st.number_input("Seconds", 0, 59, 0, key=f"{game_id}_sec")
+        seconds = st.number_input("Seconds", 0, 59, 0, step=15, key=f"{game_id}_sec")
 
     st.divider()
     st.write("### Roles")
@@ -253,3 +253,260 @@ def RenderRunGameButton(r, user_id, game_id):
 
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
+
+
+
+def RunGame(r, user_id, game_id):
+
+    # must be requested
+    if not r.get(f"game:{game_id}:run_requested"):
+        return
+
+    host = safe_decode(r.get(f"game:{game_id}:host"))
+
+    if host != user_id:
+        return
+
+    # clear request so it doesn't rerun
+    r.delete(f"game:{game_id}:run_requested")
+
+    # set state
+    r.set(f"game:{game_id}:state", "started")
+
+    # -------------------------
+    # LOAD PLAYERS
+    # -------------------------
+    player_ids = [safe_decode(p) for p in r.smembers(f"game:{game_id}:players")]
+
+    random.shuffle(player_ids)
+
+    if len(player_ids) < 4:
+        st.error("Not enough players.")
+        return
+
+    # -------------------------
+    # LOAD SETTINGS
+    # -------------------------
+    settings = r.hgetall(f"game:{game_id}:settings")
+
+    settings = {
+        safe_decode(k): safe_decode(v)
+        for k, v in settings.items()
+    }
+
+    seer = int(settings.get("seer", 0))
+    werewolves = int(settings.get("werewolves", 0))
+
+    # -------------------------
+    # LOAD WORD LIST
+    # -------------------------
+    with open("Words.txt", "r") as f:
+        words = [line.strip() for line in f if line.strip()]
+
+    mayor_words = random.sample(words, min(10, len(words)))
+
+    # -------------------------
+    # ROLE ASSIGNMENT
+    # -------------------------
+    roles = {}
+
+    idx = 0
+
+    # Mayor first
+    mayor_id = player_ids[idx]
+    roles[mayor_id] = "Mayor"
+    idx += 1
+
+    # Seer
+    for _ in range(seer):
+        if idx < len(player_ids):
+            roles[player_ids[idx]] = "Seer"
+            idx += 1
+
+    # Werewolves
+    for _ in range(werewolves):
+        if idx < len(player_ids):
+            roles[player_ids[idx]] = "Werewolf"
+            idx += 1
+
+    # Villagers
+    for i in range(idx, len(player_ids)):
+        roles[player_ids[i]] = "Villager"
+
+    # -------------------------
+    # STORE ROLES
+    # -------------------------
+    for pid, role in roles.items():
+        r.hset(f"game:{game_id}:roles", pid, role)
+
+    # -------------------------
+    # STORE MAYOR WORD LIST
+    # -------------------------
+    r.delete(f"game:{game_id}:mayor_words")
+    for w in mayor_words:
+        r.rpush(f"game:{game_id}:mayor_words", w)
+
+    st.success("Game started! Roles assigned + words loaded.")
+    st.rerun()
+
+
+import streamlit as st
+
+def safe_decode(x):
+    return x.decode() if isinstance(x, bytes) else x
+
+
+def RevealRoles(r, user_id, game_id):
+
+    state = safe_decode(r.get(f"game:{game_id}:state"))
+
+    if state != "word_selected":
+        return
+
+    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+    secret_word = safe_decode(r.get(f"game:{game_id}:secret_word"))
+
+    st.subheader("🎭 Your Role")
+
+    st.write(f"**Role:** {role}")
+
+    # -------------------------
+    # MAYOR (knows word list)
+    # -------------------------
+    if role == "Mayor":
+        words = r.lrange(f"game:{game_id}:mayor_words", 0, -1)
+        words = [safe_decode(w) for w in words]
+
+        st.write("🎯 Choose the secret word:")
+        st.write(words)
+
+    # -------------------------
+    # SEER (gets hint)
+    # -------------------------
+    elif role == "Seer":
+        st.info("🔮 You are the Seer")
+        st.write("You may see a hint about the word.")
+
+        # simple hint (first/last letter or length)
+        st.write(f"Word length: {len(secret_word)}")
+
+    # -------------------------
+    # WEREWOLVES (group info)
+    # -------------------------
+    elif role == "Werewolf":
+        st.warning("🐺 You are a Werewolf")
+        st.write("Work with other werewolves to guess the word.")
+
+        # show fellow wolves
+        players = r.hgetall(f"game:{game_id}:roles")
+
+        wolves = [
+            safe_decode(pid)
+            for pid, rrole in players.items()
+            if safe_decode(rrole) == "Werewolf"
+        ]
+
+        st.write("Other Werewolves:")
+        st.write(wolves)
+
+    # -------------------------
+    # VILLAGERS
+    # -------------------------
+    else:
+        st.success("👤 You are a Villager")
+        st.write("Try to figure out the word!")
+
+
+def RenderTimer(r, game_id):
+
+    data = r.hgetall(f"game:{game_id}:timer")
+    if not data:
+        return
+
+    start_time = float(safe_decode(data[b"start_time"]))
+    duration = int(safe_decode(data[b"duration"]))
+
+    elapsed = time.time() - start_time
+    remaining = int(duration - elapsed)
+
+    if remaining <= 0:
+        r.set(f"game:{game_id}:state", "ended")
+        st.error("⏰ Time's up!")
+        st.stop()
+
+    mins = remaining // 60
+    secs = remaining % 60
+
+    st.subheader(f"⏱ Time Left: {mins:02d}:{secs:02d}")
+
+
+import streamlit as st
+import random
+
+def safe_decode(x):
+    return x.decode() if isinstance(x, bytes) else x
+
+
+def MayorSelectWord(r, user_id, game_id):
+
+    state = safe_decode(r.get(f"game:{game_id}:state"))
+
+    if state != "started":
+        return
+
+    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+
+    if role != "Mayor":
+        return
+
+    st.subheader("👑 Choose the Secret Word")
+
+    # -------------------------
+    # LOAD OR GENERATE WORD SET
+    # -------------------------
+    words = r.lrange(f"game:{game_id}:mayor_words_pool", 0, -1)
+
+    if not words:
+        with open("Words.txt", "r") as f:
+            all_words = [w.strip() for w in f if w.strip()]
+
+        words = random.sample(all_words, min(10, len(all_words)))
+
+        r.delete(f"game:{game_id}:mayor_words_pool")
+        for w in words:
+            r.rpush(f"game:{game_id}:mayor_words_pool", w)
+
+    words = [safe_decode(w) for w in words]
+
+    chosen = st.selectbox("Pick a word", words)
+
+    col1, col2 = st.columns(2)
+
+    # -------------------------
+    # LOCK WORD
+    # -------------------------
+    with col1:
+        if st.button("🔒 Lock Word"):
+
+            r.set(f"game:{game_id}:secret_word", chosen)
+            r.set(f"game:{game_id}:state", "word_selected")
+
+            st.success("Word locked!")
+            st.rerun()
+
+    # -------------------------
+    # REROLL WORDS
+    # -------------------------
+    with col2:
+        if st.button("🎲 Reroll Words"):
+
+            with open("Words.txt", "r") as f:
+                all_words = [w.strip() for w in f if w.strip()]
+
+            new_words = random.sample(all_words, min(10, len(all_words)))
+
+            r.delete(f"game:{game_id}:mayor_words_pool")
+            for w in new_words:
+                r.rpush(f"game:{game_id}:mayor_words_pool", w)
+
+            st.rerun()
