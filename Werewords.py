@@ -244,12 +244,13 @@ def RevealRoles(r, user_id, game_id):
 
     role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
     secret = safe_decode(r.get(f"game:{game_id}:secret_word"))
-
+    st.write
     st.subheader("🎭 Role")
 
     st.write(role)
 
     if role == "Seer":
+        st.info()
         st.info(f"Hint: word length {len(secret)}")
 
     elif role == "Werewolf":
