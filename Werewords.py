@@ -1,31 +1,43 @@
 import streamlit as st
-import redis, uuid, time, random
+import redis
+import uuid
+import time
+import random
 import os
 
 
 # =========================
-# UTIL
+# REDIS + UTIL
 # =========================
 def safe_decode(x):
     return x.decode() if isinstance(x, bytes) else x
 
 
+def norm(x):
+    return safe_decode(x).strip()
+
+
+def get_role(r, game_id, user_id):
+    user_id = norm(user_id)
+    raw = r.hget(f"game:{game_id}:roles", user_id)
+    return safe_decode(raw) if raw else None
+
+
 # =========================
-# SELECT MAYOR (HOST ONLY)
+# MAYOR SELECTION
 # =========================
 def SelectMayor(r, user_id, game_id):
 
-    host_id = safe_decode(r.get(f"game:{game_id}:host"))
+    host_id = norm(r.get(f"game:{game_id}:host"))
     if user_id != host_id:
         return
 
-    player_ids = r.smembers(f"game:{game_id}:players")
+    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
+
     players = []
     id_to_name = {}
 
     for pid in player_ids:
-        pid = safe_decode(pid)
-
         name = r.hget(f"user:{pid}", "name")
         name = safe_decode(name)
 
@@ -56,15 +68,15 @@ def SelectMayor(r, user_id, game_id):
 
 
 # =========================
-# SETUP GAME
+# SETUP
 # =========================
 def StartSetup(r, user_id, game_id):
 
-    host = safe_decode(r.get(f"game:{game_id}:host"))
+    host = norm(r.get(f"game:{game_id}:host"))
     if host != user_id:
         return
 
-    player_ids = list(r.smembers(f"game:{game_id}:players"))
+    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
     player_count = len(player_ids)
 
     if player_count < 4:
@@ -86,7 +98,7 @@ def StartSetup(r, user_id, game_id):
     villagers = player_count - (mayor + seer + werewolves)
 
     if villagers < 0:
-        st.error("Invalid roles")
+        st.error("Invalid role setup")
         return
 
     if st.button("Save Setup", key=f"{game_id}_save"):
@@ -103,28 +115,25 @@ def StartSetup(r, user_id, game_id):
 
 
 # =========================
-# RUN GAME (ROLE ASSIGNMENT)
+# RUN GAME
 # =========================
 def RunGame(r, user_id, game_id):
 
     if not r.get(f"game:{game_id}:run_requested"):
         return
 
-    host = safe_decode(r.get(f"game:{game_id}:host"))
+    host = norm(r.get(f"game:{game_id}:host"))
     if user_id != host:
         return
 
     r.delete(f"game:{game_id}:run_requested")
 
-    # -------------------------
-    # LOCK STATE
-    # -------------------------
     r.set(f"game:{game_id}:state", "started")
 
     # -------------------------
     # PLAYERS
     # -------------------------
-    player_ids = [safe_decode(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
 
     if len(player_ids) < 4:
         return
@@ -132,23 +141,23 @@ def RunGame(r, user_id, game_id):
     # -------------------------
     # SETTINGS
     # -------------------------
-    settings = r.hgetall(f"game:{game_id}:settings")
-    settings = {safe_decode(k): safe_decode(v) for k, v in settings.items()}
+    settings = {
+        norm(k): norm(v)
+        for k, v in r.hgetall(f"game:{game_id}:settings").items()
+    }
 
     seer = int(settings.get("seer", 0))
     werewolves = int(settings.get("werewolves", 0))
 
     # -------------------------
-    # MAYOR (LOCKED)
+    # MAYOR
     # -------------------------
-    mayor_id = safe_decode(r.get(f"game:{game_id}:mayor"))
+    mayor_id = norm(r.get(f"game:{game_id}:mayor"))
     if not mayor_id:
-        st.error("Mayor not selected")
+        st.error("Mayor not set")
         return
 
-    # remove mayor from pool
     player_ids = [p for p in player_ids if p != mayor_id]
-
     random.shuffle(player_ids)
 
     # -------------------------
@@ -171,13 +180,13 @@ def RunGame(r, user_id, game_id):
         roles[player_ids[i]] = "Villager"
 
     for pid, role in roles.items():
-        r.hset(f"game:{game_id}:roles", pid, role)
+        r.hset(f"game:{game_id}:roles", norm(pid), role)
 
     # -------------------------
-    # WORD LIST
+    # WORDS
     # -------------------------
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    WORDS_PATH = os.path.join(BASE_DIR, "words.txt")
+    WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
 
     with open(WORDS_PATH, "r") as f:
         words = [w.strip() for w in f if w.strip()]
@@ -196,21 +205,21 @@ def RunGame(r, user_id, game_id):
 # =========================
 def MayorSelectWord(r, user_id, game_id):
 
-    state = safe_decode(r.get(f"game:{game_id}:state"))
+    state = norm(r.get(f"game:{game_id}:state"))
     if state != "started":
         return
 
-    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+    role = get_role(r, game_id, user_id)
     if role != "Mayor":
         return
 
-    words = [safe_decode(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
+    words = [norm(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
 
     st.subheader("👑 Pick Secret Word")
 
-    chosen = st.selectbox("Word", words)
-
     col1, col2 = st.columns(2)
+
+    chosen = st.selectbox("Word", words)
 
     if col1.button("Lock Word"):
         r.set(f"game:{game_id}:secret_word", chosen)
@@ -218,8 +227,9 @@ def MayorSelectWord(r, user_id, game_id):
         st.rerun()
 
     if col2.button("Re-roll"):
+
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        WORDS_PATH = os.path.join(BASE_DIR, "words.txt")
+        WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
 
         with open(WORDS_PATH, "r") as f:
             all_words = [w.strip() for w in f if w.strip()]
@@ -236,78 +246,37 @@ def MayorSelectWord(r, user_id, game_id):
 # =========================
 # REVEAL ROLES
 # =========================
-import streamlit as st
-
 def RevealRoles(r, user_id, game_id):
 
-    state = safe_decode(r.get(f"game:{game_id}:state"))
-
+    state = norm(r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
 
-    # -------------------------
-    # SAFE ROLE FETCH (FIXED BUG)
-    # -------------------------
     role = get_role(r, game_id, user_id)
+    secret = norm(r.get(f"game:{game_id}:secret_word"))
 
-    secret = safe_decode(r.get(f"game:{game_id}:secret_word"))
-
-    st.subheader("🎭 Your Role")
+    st.subheader("🎭 Role")
 
     if not role:
-        st.error("Role not found (debug: check Redis role assignment)")
+        st.error("Role missing")
         return
 
-    st.write(f"Role: **{role}**")
+    st.write(role)
 
-    # -------------------------
-    # SEER
-    # -------------------------
     if role == "Seer":
-        st.info("🔮 You are the Seer")
-        st.write("Hint system active")
-        st.write(f"Word length: {len(secret)}")
+        st.info("🔮 Seer Hint")
+        st.write(f"Length: {len(secret)}")
 
-    # -------------------------
-    # WEREWOLF
-    # -------------------------
     elif role == "Werewolf":
-        st.warning("🐺 You are a Werewolf")
+        st.warning("🐺 Werewolf")
 
-        players = r.hgetall(f"game:{game_id}:roles")
-        wolves = [
-            safe_decode(pid)
-            for pid, rrole in players.items()
-            if safe_decode(rrole) == "Werewolf"
-        ]
-
-        st.write("Other Werewolves:")
-        st.write(wolves)
-
-    # -------------------------
-    # VILLAGER
-    # -------------------------
     elif role == "Villager":
-        st.success("👤 You are a Villager")
-        st.write("Figure out the word!")
+        st.success("👤 Villager")
 
-    # -------------------------
-    # DEBUG MODE (OPTIONAL)
-    # -------------------------
     elif role == "Mayor":
-        st.info("👑 Mayor View")
-        st.write("SECRET WORD (debug only):")
-        st.error(secret)
+        st.error(f"SECRET (debug): {secret}")
 
 
-
-
-
-def get_role(r, game_id, user_id):
-    user_id = safe_decode(user_id).strip()
-
-    raw = r.hget(f"game:{game_id}:roles", user_id)
-    return safe_decode(raw) if raw else None
 # =========================
 # TIMER
 # =========================
@@ -317,14 +286,14 @@ def RenderTimer(r, user_id, game_id):
     if not data:
         return
 
-    start = float(safe_decode(data[b"start_time"]))
-    duration = int(safe_decode(data[b"duration"]))
+    start = float(norm(data.get(b"start_time", 0)))
+    duration = int(norm(data.get(b"duration", 0)))
 
     remaining = int(duration - (time.time() - start))
 
     if remaining <= 0:
         r.set(f"game:{game_id}:state", "ended")
-        st.error("Time up!")
+        st.warning("Time up!")
         return
 
     st.subheader(f"⏱ {remaining//60:02d}:{remaining%60:02d}")
@@ -335,14 +304,12 @@ def RenderTimer(r, user_id, game_id):
 # =========================
 def RenderRunGameButton(r, user_id, game_id):
 
-    state = safe_decode(r.get(f"game:{game_id}:state"))
-    host = safe_decode(r.get(f"game:{game_id}:host"))
+    state = norm(r.get(f"game:{game_id}:state"))
+    host = norm(r.get(f"game:{game_id}:host"))
 
     if host != user_id:
         return
 
-    disabled = state != "ready"
-
-    if st.button("▶ Run Game", disabled=disabled):
+    if st.button("▶ Run Game", disabled=(state != "ready")):
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()

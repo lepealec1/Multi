@@ -49,7 +49,7 @@ with st.expander("Multiplier Setup",expanded=True):
 with st.expander("Game", expanded=True):
 
     raw_state = r.get(f"game:{game_id}:state")
-    state = Werewords.safe_decode(raw_state)
+    state = safe_decode(raw_state)
 
     st.write("STATE:", state)
 
@@ -62,7 +62,7 @@ with st.expander("Game", expanded=True):
     # -------------------------
     # LOBBY
     # -------------------------
-    if state in [None, "lobby"]:
+    if not state or state == "lobby":
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.StartSetup(r, user_id, game_id)
 
@@ -86,10 +86,10 @@ with st.expander("Game", expanded=True):
     # WORD SELECTED
     # -------------------------
     elif state == "word_selected":
-        Werewords.RevealRoles(r, user_id, game_id)  
+        Werewords.RevealRoles(r, user_id, game_id)
 
 
-
+        
 role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 st.write(role)
 
