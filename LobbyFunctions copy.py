@@ -1,23 +1,8 @@
 import streamlit as st
 import redis, uuid, time
-def reload_user(r):
-    if "user_id" not in st.session_state:
-        return
-
-    user_id = st.session_state.user_id
-
-    name = r.hget(f"user:{user_id}", "name")
-    if name:
-        st.session_state.name = name
-
-    last_game = r.get(f"user:{user_id}:last_game")
-    if last_game and r.get(f"game:{last_game}:exists"):
-        st.session_state.game_id = last_game
 
 
-# -------------------------
-# USER INIT
-# -------------------------
+
 def init_user(r):
     if "user_id" not in st.session_state:
         st.session_state.user_id = str(uuid.uuid4())[:8]
@@ -41,9 +26,8 @@ def init_user(r):
     return user_id, display_name
 
 
-# -------------------------
-# CREATE GAME
-# -------------------------
+import streamlit as st
+
 def create_game(r, user_id):
     st.subheader("Create Game")
 
@@ -55,17 +39,14 @@ def create_game(r, user_id):
             r.set(f"game:{game_id}:host", user_id)
             r.sadd(f"game:{game_id}:players", user_id)
 
-            r.set(f"user:{user_id}:last_game", game_id)
-
             st.session_state.game_id = game_id
             st.rerun()
         else:
             st.error("Enter a Game ID")
 
+import streamlit as st
 
-# -------------------------
-# LOBBY VIEW
-# -------------------------
+
 def render_lobby(r, user_id):
     if "game_id" not in st.session_state:
         return
@@ -76,7 +57,6 @@ def render_lobby(r, user_id):
     st.subheader(f"🎮 Lobby: {game_id}")
 
     host_id = r.get(f"game:{game_id}:host")
-
     r.sadd(f"game:{game_id}:players", user_id)
 
     players = list(r.smembers(f"game:{game_id}:players"))
@@ -103,10 +83,8 @@ def render_lobby(r, user_id):
                     r.srem(f"game:{game_id}:players", p)
                     st.rerun()
 
+import streamlit as st
 
-# -------------------------
-# LEAVE GAME
-# -------------------------
 def leave_game(r, user_id):
     if "game_id" not in st.session_state:
         return
@@ -120,15 +98,11 @@ def leave_game(r, user_id):
         if user_id == host_id:
             r.delete(f"game:{game_id}:host")
 
-        r.delete(f"user:{user_id}:last_game")
-
         del st.session_state.game_id
         st.rerun()
 
+import streamlit as st
 
-# -------------------------
-# DELETE LOBBY (HOST ONLY)
-# -------------------------
 def delete_lobby(r, user_id):
     if "game_id" not in st.session_state:
         return
@@ -149,11 +123,12 @@ def delete_lobby(r, user_id):
 
             del st.session_state.game_id
             st.rerun()
+            
 
+import streamlit as st
 
-# -------------------------
-# VIEW LOBBIES
-# -------------------------
+import streamlit as st
+
 def view_lobbies(r):
     st.subheader("🌐 Active Lobbies")
 
@@ -172,6 +147,7 @@ def view_lobbies(r):
         host_id = r.get(f"game:{game_id}:host")
         host_name = r.hget(f"user:{host_id}", "name") if host_id else "None"
 
+        # 👇 PLAYER COUNT (THIS IS THE KEY ADDITION)
         player_count = r.scard(f"game:{game_id}:players")
 
         col1, col2, col3, col4 = st.columns([2, 2, 1, 1])
@@ -189,20 +165,22 @@ def view_lobbies(r):
             if st.button("Join", key=f"join_{game_id}"):
                 st.session_state.game_id = game_id
                 r.sadd(f"game:{game_id}:players", st.session_state.user_id)
-                r.set(f"user:{st.session_state.user_id}:last_game", game_id)
                 st.rerun()
 
+        # -------------------------
+        # ADMIN DELETE BUTTON
+        # -------------------------
         if is_admin:
             if st.button("🗑", key=f"del_{game_id}"):
                 r.delete(f"game:{game_id}:exists")
                 r.delete(f"game:{game_id}:host")
                 r.delete(f"game:{game_id}:players")
+                r.srem("active_lobbies", game_id)
+
+                st.success(f"Deleted {game_id}")
                 st.rerun()
 
 
-# -------------------------
-# REFRESH BUTTON
-# -------------------------
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()

@@ -27,16 +27,19 @@ if current != st.session_state.last_version:
     st.session_state.last_version = current
     st.rerun()
 
-
-user_id, display_name = LobbyFunctions.init_user(r)
 admin.clear_db(r)
-LobbyFunctions.create_game(r, user_id)
 
-LobbyFunctions.render_lobby(r, user_id)
-LobbyFunctions.leave_game(r, user_id)
-LobbyFunctions.delete_lobby(r, user_id)
-LobbyFunctions.view_lobbies(r)
+with st.expander("Multiplier Setup",expanded=True):
+    user_id, display_name = LobbyFunctions.init_user(r)
+    LobbyFunctions.view_lobbies(r)
 
+    LobbyFunctions.create_game(r, user_id)
+
+    LobbyFunctions.render_lobby(r, user_id)
+
+    LobbyFunctions.leave_game(r, user_id)
+
+    LobbyFunctions.delete_lobby(r, user_id)
 
 
 LobbyFunctions.refresh_button()
