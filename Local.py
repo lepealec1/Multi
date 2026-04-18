@@ -57,6 +57,3 @@ with st.expander("Game",expanded=True):
 
 LobbyFunctions.refresh_button()
 
-st.write("STATE:", state)
-st.write("HOST:", host)
-st.write("USER:", user_id)
