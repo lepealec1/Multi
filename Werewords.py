@@ -237,22 +237,19 @@ def MayorSelectWord(r, user_id, game_id):
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user_id, game_id):
-
     state = safe_decode(r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
 
     role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
     secret = safe_decode(r.get(f"game:{game_id}:secret_word"))
-    st.write
     st.subheader("🎭 Role")
-
     st.write(role)
+    if role == "Seer" and state == "word_selected":
+        st.info("🔮 DEBUG MODE")
+        st.error(f"SECRET WORD: {secret}")
 
-    if role == "Seer":
-        st.info()
-        st.info(f"Hint: word length {len(secret)}")
-
+        
     elif role == "Werewolf":
         st.warning("You are a Werewolf")
 

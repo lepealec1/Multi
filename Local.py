@@ -50,12 +50,8 @@ with st.expander("Multiplier Setup",expanded=True):
 with st.expander("Game",expanded=True):
     if st.session_state.get("game_mode") == "Werewords":
         state = r.get(f"game:{game_id}:state")
-        st.write("Sttate1:")
-        st.write(state)
         state = state.decode() if isinstance(state, bytes) else state
-        Werewords.RenderTimer(r, user_id, game_id)
-        st.write("Sttate:")
-        st.write(state)
+        #Werewords.RenderTimer(r, user_id, game_id)
         if state in [None, "lobby"]:
             Werewords.SelectMayor(r, user_id, game_id)
             Werewords.StartSetup(r, user_id, game_id)
@@ -76,7 +72,6 @@ with st.expander("Game",expanded=True):
         # WORD LOCKED PHASE
         # -------------------------
         elif state == "word_selected":
-            st.write("Werewolf")
             Werewords.RevealRoles(r, user_id, game_id)
             st.rerun()
 
@@ -90,6 +85,7 @@ LobbyFunctions.refresh_button()
 state = r.get(f"game:{game_id}:state")
 st.write("Game State:");
 st.write(state);
+
 state = r.get(f"game:{game_id}:role")
 st.write("role:");
 st.write(role);
