@@ -177,7 +177,7 @@ def RunGame(r, user_id, game_id):
     # WORD LIST
     # -------------------------
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
+    WORDS_PATH = os.path.join(BASE_DIR, "words.txt")
 
     with open(WORDS_PATH, "r") as f:
         words = [w.strip() for w in f if w.strip()]
@@ -219,7 +219,7 @@ def MayorSelectWord(r, user_id, game_id):
 
     if col2.button("Re-roll"):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
+        WORDS_PATH = os.path.join(BASE_DIR, "words.txt")
 
         with open(WORDS_PATH, "r") as f:
             all_words = [w.strip() for w in f if w.strip()]

@@ -101,3 +101,6 @@ LobbyFunctions.refresh_button()
 state = r.get(f"game:{game_id}:state")
 st.write("Game State:");
 st.write(state);
+state = r.get(f"game:{game_id}:role")
+st.write("role:");
+st.write(role);
