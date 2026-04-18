@@ -1,8 +1,7 @@
 import streamlit as st
 import redis
 import uuid
-import time
-
+import time, admin
 # -------------------------
 # AUTO REFRESH (every 5s)
 # -------------------------
@@ -12,6 +11,7 @@ if "last_refresh" not in st.session_state:
 if time.time() - st.session_state.last_refresh > 5:
     st.session_state.last_refresh = time.time()
     st.rerun()
+
 
 # -------------------------
 # REDIS CONNECTION
@@ -23,6 +23,10 @@ r = redis.Redis(
     password=st.secrets["REDIS_PASSWORD"],
     decode_responses=True
 )
+
+admin.clear_db(r)
+
+
 
 st.title("🎮 Multiplayer Lobby")
 
