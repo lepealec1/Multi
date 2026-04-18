@@ -16,4 +16,4 @@ r = redis.Redis(
     decode_responses=True
 )
 
-r.ping()
+print(r.ping())
