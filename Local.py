@@ -44,7 +44,8 @@ with st.expander("Multiplier Setup",expanded=True):
 
     if game_id:
         LobbyFunctions.SelectGame(r, user_id, game_id)    
+    if st.session_state.get("game_mode") == "Werewords":
         LobbyFunctions.SelectMayor(r, user_id, game_id)    
 
-        
+
 LobbyFunctions.refresh_button()
