@@ -1,6 +1,5 @@
 import streamlit as st
 import redis
-import uuid
 
 # -------------------------
 # REDIS CONNECTION
@@ -16,39 +15,54 @@ r = redis.Redis(
 st.title("🎮 Multiplayer Lobby")
 
 # -------------------------
-# USER ID (persistent per session)
+# USER SETUP
 # -------------------------
 if "user_id" not in st.session_state:
     st.session_state.user_id = str(uuid.uuid4())[:8]
 
 user_id = st.session_state.user_id
 
-st.write(f"Your ID: `{user_id}`")
+# 👇 NEW: user name input
+if "name" not in st.session_state:
+    st.session_state.name = ""
+
+st.subheader("👤 Your Info")
+name = st.text_input("Enter your name", value=st.session_state.name)
+
+if name:
+    st.session_state.name = name
+
+display_name = st.session_state.name if st.session_state.name else user_id
+
+st.write(f"Hello: **{display_name}**")
+
+# store user name in redis
+r.hset(f"user:{user_id}", "name", display_name)
 
 # -------------------------
-# CREATE GAME
+# CREATE GAME (custom ID)
 # -------------------------
 st.subheader("Create Game")
 
-if st.button("Create New Game"):
-    game_id = str(uuid.uuid4())[:6]
+custom_game_id = st.text_input("Enter Game ID to create (e.g. lobby1)")
 
-    # create game player set
-    r.sadd(f"game:{game_id}:players", user_id)
+if st.button("Create Game"):
+    if not custom_game_id:
+        st.error("Please enter a Game ID")
+    else:
+        r.set(f"game:{custom_game_id}:exists", 1)
+        r.sadd(f"game:{custom_game_id}:players", user_id)
 
-    # store game exists flag
-    r.set(f"game:{game_id}:exists", 1)
-
-    st.session_state.game_id = game_id
-    st.success(f"Game created! ID: {game_id}")
-    st.rerun()
+        st.session_state.game_id = custom_game_id
+        st.success(f"Game created: {custom_game_id}")
+        st.rerun()
 
 # -------------------------
 # JOIN GAME
 # -------------------------
 st.subheader("Join Game")
 
-join_id = st.text_input("Enter Game ID")
+join_id = st.text_input("Enter Game ID to join")
 
 if st.button("Join Game"):
     if r.exists(f"game:{join_id}:exists"):
@@ -60,26 +74,27 @@ if st.button("Join Game"):
         st.error("Game not found")
 
 # -------------------------
-# IN GAME VIEW
+# LOBBY
 # -------------------------
 if "game_id" in st.session_state:
     game_id = st.session_state.game_id
 
     st.divider()
-    st.subheader(f"Game: {game_id}")
+    st.subheader(f"🎮 Lobby: {game_id}")
 
-    # add yourself (safe if already added)
     r.sadd(f"game:{game_id}:players", user_id)
 
-    # get players
     players = r.smembers(f"game:{game_id}:players")
 
-    st.write("### Players in lobby:")
+    st.write("### Players")
+
     for p in players:
+        pname = r.hget(f"user:{p}", "name") or p
+
         if p == user_id:
-            st.write(f"🟢 {p} (you)")
+            st.write(f"🟢 {pname} (you)")
         else:
-            st.write(f"⚪ {p}")
+            st.write(f"⚪ {pname}")
 
     # -------------------------
     # LEAVE GAME
@@ -89,8 +104,4 @@ if "game_id" in st.session_state:
         del st.session_state.game_id
         st.rerun()
 
-    # -------------------------
-    # AUTO REFRESH
-    # -------------------------
-    st.caption("Auto-refreshing...")
-    st.experimental_rerun()
+    st.caption("Refresh page to update players")
