@@ -57,3 +57,5 @@ with st.expander("Game",expanded=True):
 
 LobbyFunctions.refresh_button()
 
+state = r.get(f"game:{game_id}:state")
+st.write(state);

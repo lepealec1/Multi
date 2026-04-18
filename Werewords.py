@@ -246,3 +246,4 @@ def RenderRunGameButton(r, user_id, game_id):
 
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
+
