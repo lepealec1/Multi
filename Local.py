@@ -50,4 +50,3 @@ with st.expander("Multiplier Setup",expanded=True):
 
 LobbyFunctions.refresh_button()
 
-st.write("RAW PLAYERS:", player_ids)
