@@ -27,5 +27,6 @@ lobby_functions.join_game(r, user_id)
 lobby_functions.render_lobby(r, user_id)
 lobby_functions.leave_game(r, user_id)
 lobby_functions.delete_lobby(r, user_id)
+lobby_functions.view_lobbies(r)
 
 

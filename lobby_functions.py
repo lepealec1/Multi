@@ -60,7 +60,6 @@ def join_game(r, user_id):
             st.error("Game not found")
 
 
-import streamlit as st
 
 def render_lobby(r, user_id):
     if "game_id" not in st.session_state:
@@ -139,3 +138,37 @@ def delete_lobby(r, user_id):
             del st.session_state.game_id
             st.rerun()
             
+
+import streamlit as st
+
+def view_lobbies(r):
+    st.subheader("🌐 Active Lobbies")
+
+    # collect all game keys
+    keys = r.keys("game:*:exists")
+
+    if not keys:
+        st.write("No active lobbies")
+        return
+
+    for key in keys:
+        game_id = key.split(":")[1]
+
+        players = r.smembers(f"game:{game_id}:players")
+        host_id = r.get(f"game:{game_id}:host")
+
+        host_name = r.hget(f"user:{host_id}", "name") if host_id else "None"
+
+        col1, col2, col3 = st.columns([2, 2, 1])
+
+        with col1:
+            st.write(f"🎮 **{game_id}**")
+
+        with col2:
+            st.write(f"👑 Host: {host_name}")
+
+        with col3:
+            if st.button("Join", key=f"join_{game_id}"):
+                st.session_state.game_id = game_id
+                r.sadd(f"game:{game_id}:players", st.session_state.user_id)
+                st.rerun()
