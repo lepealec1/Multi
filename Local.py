@@ -1,10 +1,12 @@
 import streamlit as st
 import time, admin, uuid, redis
-import functions
+import Functions, LobbyFunctions
+
+
 # 2.2MB
 if "name" not in st.session_state:
     st.session_state.name = ""
-functions.auto_refresh(5)
+Functions.auto_refresh(5)
 
 r = redis.Redis(
     host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
@@ -16,6 +18,13 @@ r = redis.Redis(
 
 admin.clear_db(r)
 
+user_id, display_name = LobbyFunctions.init_user(r)
+LobbyFunctions.create_game(r, user_id)
+LobbyFunctions.join_game(r, user_id)
+
+LobbyFunctions.render_lobby(r, user_id)
+LobbyFunctions.leave_game(r, user_id)
+LobbyFunctions.delete_lobby(r, user_id)
 
 
 st.title("🎮 Multiplayer Lobby")
@@ -65,9 +74,6 @@ if st.button("Create Game"):
     else:
         st.error("Enter a Game ID")
 
-# -------------------------
-# JOIN GAME
-# -------------------------
 st.subheader("Join Game")
 
 join_id = st.text_input("Game ID to join")
@@ -98,7 +104,7 @@ if "game_id" in st.session_state:
 
     host_name = r.hget(f"user:{host_id}", "name") if host_id else "None"
 
-    st.write(f"👑 Host: **{host_name}**")
+    st.write(f"Host: **{host_name}**")
 
     st.write("### Players")
 
@@ -116,7 +122,7 @@ if "game_id" in st.session_state:
         with col2:
             # host-only kick
             if user_id == host_id and p != user_id:
-                if st.button("❌ Kick", key=f"kick_{p}"):
+                if st.button("❌ Remove Player", key=f"kick_{p}"):
                     r.srem(f"game:{game_id}:players", p)
                     st.rerun()
 
