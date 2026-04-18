@@ -1,6 +1,7 @@
 import streamlit as st
 import time, admin, uuid, redis
-import Functions, LobbyFunctions
+import Functions
+import LobbyFunctions
 
 
 # 2.2MB
@@ -19,6 +20,7 @@ r = redis.Redis(
 admin.clear_db(r)
 
 user_id, display_name = LobbyFunctions.init_user(r)
+
 LobbyFunctions.create_game(r, user_id)
 LobbyFunctions.join_game(r, user_id)
 
