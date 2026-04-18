@@ -441,7 +441,7 @@ def RenderTimer(r, game_id):
     
 
 
-    def MayorSelectWord(r, user_id, game_id):
+def MayorSelectWord(r, user_id, game_id):
 
     state = safe_decode(r.get(f"game:{game_id}:state"))
 
@@ -469,76 +469,3 @@ def RenderTimer(r, game_id):
         st.rerun()
 
 
-import random
-import streamlit as st
-
-def safe_decode(x):
-    return x.decode() if isinstance(x, bytes) else x
-
-
-def MayorSelectWord(r, user_id, game_id):
-
-    state = safe_decode(r.get(f"game:{game_id}:state"))
-
-    if state != "started":
-        return
-
-    role = safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-
-    if role != "Mayor":
-        return
-
-    st.subheader("👑 Choose the Secret Word")
-
-    # -------------------------
-    # LOAD CURRENT WORD POOL
-    # -------------------------
-    words = r.lrange(f"game:{game_id}:mayor_words_pool", 0, -1)
-    words = [safe_decode(w) for w in words]
-
-    # if empty → initialize
-    if not words:
-        with open("Words.txt", "r") as f:
-            all_words = [w.strip() for w in f if w.strip()]
-
-        words = random.sample(all_words, min(10, len(all_words)))
-
-        r.delete(f"game:{game_id}:mayor_words_pool")
-        for w in words:
-            r.rpush(f"game:{game_id}:mayor_words_pool", w)
-
-    # -------------------------
-    # UI
-    # -------------------------
-    chosen = st.selectbox("Pick a word", words)
-
-    col1, col2 = st.columns(2)
-
-    # -------------------------
-    # LOCK WORD
-    # -------------------------
-    with col1:
-        if st.button("🔒 Lock In Word"):
-
-            r.set(f"game:{game_id}:secret_word", chosen)
-            r.set(f"game:{game_id}:state", "word_selected")
-
-            st.success("Word locked in!")
-            st.rerun()
-
-    # -------------------------
-    # REROLL WORDS
-    # -------------------------
-    with col2:
-        if st.button("🎲 Re-roll Words"):
-
-            with open("Words.txt", "r") as f:
-                all_words = [w.strip() for w in f if w.strip()]
-
-            new_words = random.sample(all_words, min(10, len(all_words)))
-
-            r.delete(f"game:{game_id}:mayor_words_pool")
-            for w in new_words:
-                r.rpush(f"game:{game_id}:mayor_words_pool", w)
-
-            st.rerun()
