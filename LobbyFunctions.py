@@ -218,42 +218,44 @@ def SelectGame(r, user_id, game_id):
 
 
 def SelectMayor(r, user_id, game_id):
-    host_id = r.get(f"game:{game_id}:host")
+    if st.session_state.get("game_mode") == "Werewords":
+        SelectMayor(r, user_id, game_id)
+        host_id = r.get(f"game:{game_id}:host")
 
-    if host_id is None:
-        return r.get(f"game:{game_id}:mayor")
+        if host_id is None:
+            return r.get(f"game:{game_id}:mayor")
 
-    if isinstance(host_id, bytes):
-        host_id = host_id.decode("utf-8")
+        if isinstance(host_id, bytes):
+            host_id = host_id.decode("utf-8")
 
-    players = r.smembers(f"game:{game_id}:players")
-    players = [
-        p.decode("utf-8") if isinstance(p, bytes) else p
-        for p in players
-    ]
+        players = r.smembers(f"game:{game_id}:players")
+        players = [
+            p.decode("utf-8") if isinstance(p, bytes) else p
+            for p in players
+        ]
 
-    if not players:
-        return None
+        if not players:
+            return None
 
-    # non-hosts just read
-    if user_id != host_id:
-        mayor = r.get(f"game:{game_id}:mayor")
-        return mayor.decode("utf-8") if isinstance(mayor, bytes) else mayor
+        # non-hosts just read
+        if user_id != host_id:
+            mayor = r.get(f"game:{game_id}:mayor")
+            return mayor.decode("utf-8") if isinstance(mayor, bytes) else mayor
 
-    if "mayor" not in st.session_state:
-        st.session_state.mayor = None
+        if "mayor" not in st.session_state:
+            st.session_state.mayor = None
 
-    current = st.session_state.mayor
-    if current not in players:
-        current = players[0]
+        current = st.session_state.mayor
+        if current not in players:
+            current = players[0]
 
-    st.session_state.mayor = st.selectbox(
-        "Select Mayor",
-        players,
-        index=players.index(current),
-        key=f"mayor_{game_id}"
-    )
+        st.session_state.mayor = st.selectbox(
+            "Select Mayor",
+            players,
+            index=players.index(current),
+            key=f"mayor_{game_id}"
+        )
 
-    r.set(f"game:{game_id}:mayor", st.session_state.mayor)
+        r.set(f"game:{game_id}:mayor", st.session_state.mayor)
 
-    return st.session_state.mayor
+        return st.session_state.mayor
