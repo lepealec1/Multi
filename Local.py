@@ -49,19 +49,53 @@ with st.expander("Multiplier Setup",expanded=True):
   
 with st.expander("Game",expanded=True):
     if st.session_state.get("game_mode") == "Werewords":
-        Werewords.SelectMayor(r, user_id, game_id)
-        Werewords.StartSetup(r,user_id,game_id)
-        Werewords.RenderRunGameButton(r,user_id,game_id)
-        Werewords.RunGame(r,user_id,game_id)
-        Werewords.MayorSelectWord(r,user_id,game_id)
-        Werewords.RevealRoles(r,user_id,game_id)
-        Werewords.RenderTimer(r,user_id,game_id)
+        state = r.get(f"game:{game_id}:state")
+        state = state.decode() if isinstance(state, bytes) else state
 
-role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+
+        # -------------------------
+        # ALWAYS RUN (UI ONLY)
+        # -------------------------
+        Werewords.RenderTimer(r, user_id, game_id)
+
+
+        # -------------------------
+        # LOBBY PHASE
+        # -------------------------
+        if state in [None, "lobby"]:
+
+            Werewords.SelectMayor(r, user_id, game_id)
+            Werewords.StartSetup(r, user_id, game_id)
+
+
+        # -------------------------
+        # READY PHASE
+        # -------------------------
+        elif state == "ready":
+
+            Werewords.RenderRunGameButton(r, user_id, game_id)
+            Werewords.RunGame(r, user_id, game_id)
+
+
+        # -------------------------
+        # GAME STARTED PHASE
+        # -------------------------
+        elif state == "started":
+
+            Werewords.MayorSelectWord(r, user_id, game_id)
+
+
+        # -------------------------
+        # WORD LOCKED PHASE
+        # -------------------------
+        elif state == "word_selected":
+
+            Werewords.RevealRoles(r, user_id, game_id)role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 st.write(role)
 
 
 LobbyFunctions.refresh_button()
 
 state = r.get(f"game:{game_id}:state")
+st.write("Game State:");
 st.write(state);
