@@ -59,17 +59,25 @@ def SelectMayor(r, user_id, game_id):
 import streamlit as st
 import redis
 
+import streamlit as st
+import random
+
 def StartSetup(r, user_id, game_id):
 
     players_key = f"game:{game_id}:players"
-    player_count = r.scard(players_key)
+    player_ids = list(r.smembers(players_key))
+    player_count = len(player_ids)
 
-    # Must have at least 4 players
+    # decode Redis bytes
+    player_ids = [
+        p.decode() if isinstance(p, bytes) else p
+        for p in player_ids
+    ]
+
     if player_count < 4:
         st.warning("Need at least 4 players to start Werewords.")
         return
 
-    # Only host can configure
     host = r.get(f"game:{game_id}:host")
     if host:
         host = host.decode() if isinstance(host, bytes) else host
@@ -78,7 +86,6 @@ def StartSetup(r, user_id, game_id):
         st.info("Waiting for host to start setup...")
         return
 
-    # prevent reopening multiple times
     if r.get(f"game:{game_id}:setup_done"):
         return
 
@@ -94,44 +101,72 @@ def StartSetup(r, user_id, game_id):
             seconds = st.number_input("Seconds", 0, 59, 0)
 
         st.divider()
-        st.write("### Roles")
+        st.write("### Role Settings")
 
-        mayor = st.number_input("Mayor", 0, player_count, 1)
-        seer = st.number_input("Seer", 0, player_count, 1)
-        werewolves = st.number_input("Werewolves", 1, player_count, 1)
+        seer = st.number_input("Seer", 0, player_count - 1, 1)
+        werewolves = st.number_input("Werewolves", 1, player_count - 2, 1)
+
+        # Mayor is ALWAYS 1
+        mayor = 1
 
         villagers = player_count - (mayor + seer + werewolves)
 
+        st.write(f"Mayor: **1 (fixed)**")
         st.write(f"Villagers (auto): **{villagers}**")
 
         total = mayor + seer + werewolves + villagers
 
         if villagers < 0:
-            st.error("Too many special roles.")
+            st.error("Too many special roles for player count.")
             return
 
         if total != player_count:
-            st.error("Roles must equal total players.")
+            st.error("Role mismatch.")
             return
 
         if st.button("Start Game"):
 
+            # --- RANDOM ROLE ASSIGNMENT ---
+            random.shuffle(player_ids)
+
+            roles = {}
+
+            roles[player_ids[0]] = "Mayor"
+
+            idx = 1
+
+            for _ in range(seer):
+                roles[player_ids[idx]] = "Seer"
+                idx += 1
+
+            for _ in range(werewolves):
+                roles[player_ids[idx]] = "Werewolf"
+                idx += 1
+
+            for i in range(idx, player_count):
+                roles[player_ids[i]] = "Villager"
+
+            # --- STORE IN REDIS ---
+
             r.hset(f"game:{game_id}:settings", mapping={
                 "timer_seconds": int(minutes * 60 + seconds),
-                "mayor": int(mayor),
-                "seer": int(seer),
-                "werewolves": int(werewolves),
-                "villagers": int(villagers)
+                "mayor": 1,
+                "seer": seer,
+                "werewolves": werewolves,
+                "villagers": villagers
             })
+
+            # store player roles
+            for pid, role in roles.items():
+                r.hset(f"game:{game_id}:roles", pid, role)
 
             r.set(f"game:{game_id}:state", "started")
             r.set(f"game:{game_id}:setup_done", 1)
 
-            st.success("Game started!")
+            st.success("Game started! Roles assigned.")
             st.rerun()
 
     setup()
-
 '''
 🐺 Main Roles
 Mayor
