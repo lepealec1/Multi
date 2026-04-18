@@ -9,11 +9,6 @@ if "name" not in st.session_state:
     st.session_state.name = ""
 
 
-import time
-import streamlit as st
-
-# only refresh occasionally
-
 
 r = redis.Redis(
     host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
@@ -23,18 +18,15 @@ r = redis.Redis(
     decode_responses=True
 )
 
-now = time.time()
+if "last_version" not in st.session_state:
+    st.session_state.last_version = r.get("game:version")
 
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = now
+current = r.get("game:version")
 
-# always compute first
-elapsed = now - st.session_state.last_refresh
-
-if elapsed > 5:
-    st.session_state.last_refresh = now
+if current != st.session_state.last_version:
+    st.session_state.last_version = current
     st.rerun()
-admin.clear_db(r)
+
 
 user_id, display_name = LobbyFunctions.init_user(r)
 

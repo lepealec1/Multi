@@ -1,20 +1,11 @@
-"""Basic connection example.
-"""
+import streamlit as st
 
-import redis
+st.autorefresh(interval=5000, key="auto_refresh")
+if "last_version" not in st.session_state:
+    st.session_state.last_version = r.get("game:version")
 
-r = redis.Redis(
-    host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
-    port=11322,
-    decode_responses=True,
-    username="default",
-    password="UxXQyBngaO7mDWWesUdn7WPsDcBqRYdv",
-)
+current = r.get("game:version")
 
-success = r.set('foo', 'bar')
-# True
-
-result = r.get('foo')
-print(result)
-# >>> bar
-
+if current != st.session_state.last_version:
+    st.session_state.last_version = current
+    st.rerun()
