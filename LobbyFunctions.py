@@ -184,28 +184,25 @@ def view_lobbies(r):
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
+
 def SelectGame(r, user_id, game_id):
     host_id = r.get(f"game:{game_id}:host")
 
-    # safe decode (works whether Redis returns bytes or str)
-    if isinstance(host_id, bytes):
-        host_id = host_id.decode("utf-8")
-
-    # fallback safety
     if host_id is None:
         return st.session_state.get("game_mode", "None")
+
+    if isinstance(host_id, bytes):
+        host_id = host_id.decode("utf-8")
 
     # only host can change it
     if user_id != host_id:
         return st.session_state.get("game_mode", "None")
 
-    # initialize state safely
+    options = ["None", "Werewords"]
+
     if "game_mode" not in st.session_state:
         st.session_state.game_mode = "None"
 
-    options = ["None", "Werewords"]
-
-    # ensure valid index even if state got corrupted
     current = st.session_state.game_mode
     if current not in options:
         current = "None"
@@ -214,26 +211,49 @@ def SelectGame(r, user_id, game_id):
         "Select Game Mode",
         options,
         index=options.index(current),
-        key=f"game_mode_{game_id}"  # prevents Streamlit rerun conflicts
+        key=f"game_mode_{game_id}"
     )
-    if st.session_state.game_mode == "Werewords" and user_id == host_id:
 
-        players = list(r.smembers(f"game:{game_id}:players"))
+    return st.session_state.game_mode
 
-        # decode if needed
-        players = [
-            p.decode("utf-8") if isinstance(p, bytes) else p
-            for p in players
-        ]
 
-        mayor = st.selectbox(
-            "Select Mayor",
-            players,
-            key=f"mayor_{game_id}"
-        )
+def SelectMayor(r, user_id, game_id):
+    host_id = r.get(f"game:{game_id}:host")
 
-        st.session_state.mayor = mayor
+    if host_id is None:
+        return r.get(f"game:{game_id}:mayor")
 
-        # optionally store in Redis
-        r.set(f"game:{game_id}:mayor", mayor)
-        return st.session_state.game_mode
+    if isinstance(host_id, bytes):
+        host_id = host_id.decode("utf-8")
+
+    players = r.smembers(f"game:{game_id}:players")
+    players = [
+        p.decode("utf-8") if isinstance(p, bytes) else p
+        for p in players
+    ]
+
+    if not players:
+        return None
+
+    # non-hosts just read
+    if user_id != host_id:
+        mayor = r.get(f"game:{game_id}:mayor")
+        return mayor.decode("utf-8") if isinstance(mayor, bytes) else mayor
+
+    if "mayor" not in st.session_state:
+        st.session_state.mayor = None
+
+    current = st.session_state.mayor
+    if current not in players:
+        current = players[0]
+
+    st.session_state.mayor = st.selectbox(
+        "Select Mayor",
+        players,
+        index=players.index(current),
+        key=f"mayor_{game_id}"
+    )
+
+    r.set(f"game:{game_id}:mayor", st.session_state.mayor)
+
+    return st.session_state.mayor
