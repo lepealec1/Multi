@@ -1,6 +1,6 @@
 import redis
 import streamlit as st
-st.write(1)
+st.write(12345)
 
 
 r = redis.Redis(
@@ -8,7 +8,7 @@ r = redis.Redis(
     port=11322,
     decode_responses=True,
     username="default",
-    password=st.secrets["REDIS_PASSWORD"],
+    password="UxXQyBngaO7mDWWesUdn7WPsDcBqRYdv",
 )
 success = r.set('foo', 'bar')
 # True
