@@ -184,3 +184,21 @@ def view_lobbies(r):
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
+
+def SelectGame(r, user_id, game_id):
+    host_id = r.get(f"game:{game_id}:host")
+
+    # only host can see it
+    if user_id != host_id:
+        return st.session_state.get("game_mode", "None")
+
+    if "game_mode" not in st.session_state:
+        st.session_state.game_mode = "None"
+
+    st.session_state.game_mode = st.radio(
+        "Select Game Mode",
+        ["None", "Werewords"],
+        index=["None", "Werewords"].index(st.session_state.game_mode)
+    )
+
+    return st.session_state.game_mode
