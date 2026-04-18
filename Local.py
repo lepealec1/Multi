@@ -22,13 +22,18 @@ r = redis.Redis(
     password=st.secrets["REDIS_PASSWORD"],
     decode_responses=True
 )
+
+now = time.time()
+
 if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
+    st.session_state.last_refresh = now
 
-if time.time() - st.session_state.last_refresh > 5:
-    st.session_state.last_refresh = time.time()
+# always compute first
+elapsed = now - st.session_state.last_refresh
+
+if elapsed > 5:
+    st.session_state.last_refresh = now
     st.rerun()
-
 admin.clear_db(r)
 
 user_id, display_name = LobbyFunctions.init_user(r)
