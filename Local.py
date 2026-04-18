@@ -52,7 +52,6 @@ with st.expander("Game",expanded=True):
     if st.session_state.get("game_mode") == "Werewords":
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.SetupGame(r,user_id,game_id)
-    w
 
 LobbyFunctions.refresh_button()
 
