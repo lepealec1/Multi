@@ -184,25 +184,37 @@ def view_lobbies(r):
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
-
 def SelectGame(r, user_id, game_id):
-    
     host_id = r.get(f"game:{game_id}:host")
 
-    if host_id:
+    # safe decode (works whether Redis returns bytes or str)
+    if isinstance(host_id, bytes):
         host_id = host_id.decode("utf-8")
 
-    # only host can see it
+    # fallback safety
+    if host_id is None:
+        return st.session_state.get("game_mode", "None")
+
+    # only host can change it
     if user_id != host_id:
         return st.session_state.get("game_mode", "None")
 
+    # initialize state safely
     if "game_mode" not in st.session_state:
         st.session_state.game_mode = "None"
 
+    options = ["None", "Werewords"]
+
+    # ensure valid index even if state got corrupted
+    current = st.session_state.game_mode
+    if current not in options:
+        current = "None"
+
     st.session_state.game_mode = st.radio(
         "Select Game Mode",
-        ["None", "Werewords"],
-        index=["None", "Werewords"].index(st.session_state.game_mode)
+        options,
+        index=options.index(current),
+        key=f"game_mode_{game_id}"  # prevents Streamlit rerun conflicts
     )
 
     return st.session_state.game_mode
