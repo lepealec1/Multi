@@ -219,3 +219,27 @@ def RunGame(r, user_id, game_id):
 
     st.success("Game started!")
     st.rerun()
+
+
+
+import streamlit as st
+
+def RenderRunGameButton(r, user_id, game_id):
+
+    state = r.get(f"game:{game_id}:state")
+    state = state.decode() if isinstance(state, bytes) else state
+
+    host = r.get(f"game:{game_id}:host")
+    host = host.decode() if isinstance(host, bytes) else host
+
+    # only show in READY state + only host
+    if state != "ready":
+        return
+
+    if host != user_id:
+        return
+
+    if st.button("▶ Run Game"):
+
+        r.set(f"game:{game_id}:run_requested", 1)
+        st.rerun()

@@ -53,7 +53,7 @@ with st.expander("Game",expanded=True):
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.StartSetup(r,user_id,game_id)
         Werewords.RunGame(r,user_id,game_id)
-
+        Werewords.RenderRunGameButton(r,user_id,game_id)
 
 
 LobbyFunctions.refresh_button()
