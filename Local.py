@@ -40,7 +40,9 @@ with st.expander("Multiplier Setup",expanded=True):
     LobbyFunctions.leave_game(r, user_id)
 
     LobbyFunctions.delete_lobby(r, user_id)
-    LobbyFunctions.SelectGame(r, user_id)
+    game_id = st.session_state.get("game_id")
 
+    if game_id:
+        LobbyFunctions.SelectGame(r, user_id, game_id)    
 
 LobbyFunctions.refresh_button()
