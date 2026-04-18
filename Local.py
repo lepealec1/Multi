@@ -26,6 +26,7 @@ if "last_tick" not in st.session_state:
     st.session_state.last_tick = time.time()
 
 if time.time() - st.session_state.last_tick > 5:
+    st.session_state.game_id=0
     game_id = st.session_state.game_id
     st.session_state.last_tick = time.time()
 
