@@ -185,7 +185,9 @@ def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
 
-def SelectGame(r, user_id, game_id):
+def SelectGame(r, user_id):
+    game_id = st.session_state.get("game_id")
+
     host_id = r.get(f"game:{game_id}:host")
 
     if host_id:
