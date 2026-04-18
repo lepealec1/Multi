@@ -7,7 +7,14 @@ import LobbyFunctions
 # 2.2MB
 if "name" not in st.session_state:
     st.session_state.name = ""
-functions.auto_refresh(5)
+
+    
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+if time.time() - st.session_state.last_refresh > 5:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
 
 r = redis.Redis(
     host='redis-11322.c12.us-east-1-4.ec2.cloud.redislabs.com',
