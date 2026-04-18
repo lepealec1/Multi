@@ -3,3 +3,4 @@ fpdf
 google-auth-oauthlib
 google-api-python-client
 redis
+streamlit_autorefresh
