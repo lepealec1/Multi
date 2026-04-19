@@ -297,14 +297,24 @@ def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
-    role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-    role2 = Functions.norm(r.hget(f"game:{game_id}:roles", user_id))
-    st.write("RenderRunGameButton Host:",host)
-    st.write("RenderRunGameButton Role:",role)
-    st.write("RenderRunGameButton Role2:",role2)
-    if role != "Mayor":
+    secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
+
+    # DEBUG (optional)
+    st.write("SECRET:", secret)
+
+    # only host sees button
+    if host != user_id:
         return
 
-    if st.button("▶ Run Game", disabled=(state != "ready")):
+    # better validation
+    can_start = (
+        state == "ready"
+        and secret is not None
+        and secret != ""
+        and secret.lower() != "none"
+    )
+
+    if st.button("▶ Run Game", disabled=not can_start):
+
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
