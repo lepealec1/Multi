@@ -292,7 +292,7 @@ def Paused(r,user, game_id):
     secret_word = r.get(f"game:{game_id}:secret_word")
     st.warning("Secrete word discovered.")
     st.warning("Werewolves vote to discover the seer.")
-    st.warning(f"Secret word:",secret_word)
+    st.warning(f"Secret word: {secret_word}")
 
 ###
 # Mayor Word Select + Pause Timer
