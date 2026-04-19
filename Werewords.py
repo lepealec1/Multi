@@ -63,7 +63,8 @@ def SelectMayor(r, user, game_id):
 # =========================
 def StartSetup(r, user, game_id):
 
-    host = Functions.norm(r.get(f"game:{game_id}:host"))
+    host = (r.get(f"game:{game_id}:host"))
+    st.write("StartSetup:Host:",host)
     if host != user:
         return
 

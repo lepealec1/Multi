@@ -87,7 +87,7 @@ with st.expander("Game", expanded=True):
     # -------------------------
     if state in [None, "lobby"]:
         Werewords.SelectMayor(r, user, game_id)
-        #Werewords.StartSetup(r, user, game_id)
+        Werewords.StartSetup(r, user, game_id)
 
     # -------------------------
     # READY
