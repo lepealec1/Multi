@@ -197,7 +197,7 @@ def RunGame(r, user, game_id):
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
 
-    state = Functions.norm(r.get(f"game:{game_id}:state"))
+    state = (r.get(f"game:{game_id}:state"))
     st.write("MayorSelectWord STATE:", state)
 
     if state != "ready":
