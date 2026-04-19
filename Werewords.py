@@ -76,18 +76,6 @@ def StartSetup(r, user, game_id):
         st.warning("Need at least 3 players")
         return
     st.subheader("⚙ Setup Game")
-    col1, col2 = st.columns(2)
-    with col1:
-        minutes = st.number_input("Minutes", 0, 60, 5, key=f"{game_id}_min")
-    with col2:
-        seconds = st.number_input(
-            "Seconds",
-            min_value=0,
-            max_value=59,
-            value=0,
-            step=15,
-            key=f"{game_id}_sec"
-        )
     seer = st.number_input("Seer", 0, player_count - 2, 1, key=f"{game_id}_seer")
     werewolves = st.number_input("Werewolves", 1, player_count - 3, 1, key=f"{game_id}_wolf")
     mayor = 1
@@ -97,7 +85,6 @@ def StartSetup(r, user, game_id):
         return
     if st.button("Save Setup", key=f"{game_id}_save"):
         r.hset(f"game:{game_id}:settings", mapping={
-            "timer_seconds": int(minutes * 60 + seconds),
             "seer": seer,
             "werewolves": werewolves,
             "villagers": villagers
@@ -287,13 +274,19 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
-def Paused(r,user, game_id):
+def Discovered(r,user, game_id):
     secret_word = r.get(f"game:{game_id}:secret_word")
     st.warning("✅ Secret word discovered.")
     st.warning("🐺 Werewolves vote to discover the seer 🔮.")
     st.warning(f"🔑 Secret word: {secret_word}")
 
 def Time(r,user,game_id):
+    secret_word = r.get(f"game:{game_id}:secret_word")
+    st.warning("❌ Secret word not discovered.")
+    st.warning("👤 Villagers vote to discover at least 1 werewolf 🐺.")
+    st.warning(f"🔑 Secret word: {secret_word}")
+
+def No_Tokens(r,user,game_id):
     secret_word = r.get(f"game:{game_id}:secret_word")
     st.warning("❌ Secret word not discovered.")
     st.warning("👤 Villagers vote to discover at least 1 werewolf 🐺.")
@@ -310,5 +303,10 @@ def MayorButtons(r, user, game_id):
     if user != mayor:
         return
     if st.button("Secret word discovered!", key=f"{game_id}_discovered"):
-        r.set(f"game:{game_id}:state", "paused")
+        r.set(f"game:{game_id}:state", "discovered")
+    if st.button("Time is up!", key=f"{game_id}_time"):
+        r.set(f"game:{game_id}:state", "times_up")
+    if st.button("No more tokens!", key=f"{game_id}_time"):
+        r.set(f"game:{game_id}:state", "no_tokens")
     st.rerun()
+        

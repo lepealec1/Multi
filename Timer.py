@@ -31,5 +31,5 @@ def Countdown(r, user, game_id):
     st.write(f"⏱ {mins:02d}:{secs:02d}")
     st.warning(f"⏱ {mins:02d}:{secs:02d}")
 
-    time.sleep(10)
+    time.sleep(30)
     st.rerun()

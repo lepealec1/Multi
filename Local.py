@@ -99,14 +99,12 @@ with st.expander("Game", expanded=True):
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
         Werewords.MayorButtons(r,user,game_id)
-        Timer.Countdown(r, user, game_id)
+    elif state=="discovered":
+        Werewords.Discovered(r,user,game_id)
     elif state=="times_up":
         Werewords.Time(r,user,game_id)
-    elif state=="paused":
-        Werewords.Paused(r,user,game_id)
-
-
-
+    elif state=="no_tokens":
+        Werewords.No_Tokens(r,user,game_id)
 
 LobbyFunctions.Reset(r,user,game_id)
 
