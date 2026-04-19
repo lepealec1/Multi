@@ -1,24 +1,39 @@
 import streamlit as st
 import time
 
-def Countdown(reset=False):
+def timer(duration=300, key="timer"):
 
-    duration = 300
+    # -------------------------
+    # set start time once
+    # -------------------------
+    if key not in st.session_state:
+        st.session_state[key] = time.time()
 
-    if reset or "start_time" not in st.session_state:
-        st.session_state.start_time = time.time()
-
-    elapsed = time.time() - st.session_state.start_time
+    # -------------------------
+    # compute remaining time
+    # -------------------------
+    elapsed = time.time() - st.session_state[key]
     remaining = int(duration - elapsed)
 
-    st.write("start:", st.session_state.start_time)
-    st.write("elapsed:", elapsed)
-    st.write("remaining:", remaining)
-
+    # -------------------------
+    # time up
+    # -------------------------
     if remaining <= 0:
         st.warning("⏰ Time up!")
-        return
+        return 0
 
-    st.subheader(f"{remaining//60:02d}:{remaining%60:02d}")
+    # -------------------------
+    # display
+    # -------------------------
+    mins = remaining // 60
+    secs = remaining % 60
 
-    st.autorefresh(interval=1000, key="timer_refresh")
+    st.subheader(f"⏱ {mins:02d}:{secs:02d}")
+    st.caption(f"{remaining} seconds left")
+
+    # -------------------------
+    # auto refresh
+    # -------------------------
+    st.autorefresh(interval=1000, key=f"{key}_refresh")
+
+    return remaining
