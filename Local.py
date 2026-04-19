@@ -87,20 +87,20 @@ with st.expander("Game", expanded=True):
     # -------------------------
     if state in [None, "lobby"]:
         Werewords.SelectMayor(r, user, game_id)
-        Werewords.StartSetup(r, user, game_id)
+        #Werewords.StartSetup(r, user, game_id)
 
     # -------------------------
     # READY
     # -------------------------
-    elif state == "ready":
-        Werewords.RenderRunGameButton(r, user, game_id)
-        Werewords.RunGame(r, user, game_id)
+    #elif state == "ready":
+        #Werewords.RenderRunGameButton(r, user, game_id)
+       # Werewords.RunGame(r, user, game_id)
 
     # -------------------------
     # WORD SELECTED
     # -------------------------
-    elif state == "word_selected":
-        Werewords.RevealRoles(r, user, game_id)
+    #elif state == "word_selected":
+        #Werewords.RevealRoles(r, user, game_id)
 
 
 
