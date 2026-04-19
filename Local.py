@@ -104,12 +104,12 @@ with st.expander("Game", expanded=True):
         secret_word = r.get(f"game:{game_id}:secret_word")
         st.warning("Secret word not discovered.")
         st.warning("Villagers vote to discover at least 1 werewolf.")
-        st.warning("Secret word:",secret_word)
+        st.warning(f"Secret word:",secret_word)
     elif state=="paused":
         secret_word = r.get(f"game:{game_id}:secret_word")
         st.warning("Secrete word discovered.")
         st.warning("Werewolves vote to discover the seer.")
-        st.warning("Secret word:",secret_word)
+        st.warning(f"Secret word:",secret_word)
 
 
 
