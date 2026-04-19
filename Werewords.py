@@ -196,6 +196,11 @@ def MayorSelectWord(r, user, game_id):
     col1, col2 = st.columns(2)
     chosen = st.selectbox("Word", words)
 
+    all_words = load_words()
+    new_words = random.sample(all_words, min(10, len(all_words)))
+    for w in new_words:
+        r.rpush(f"game:{game_id}:mayor_words", w)
+
     if col1.button("Lock Word"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
