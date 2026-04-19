@@ -290,15 +290,15 @@ def AssignRoles(r, user, game_id):
 
 def Paused(r,user, game_id):
     secret_word = r.get(f"game:{game_id}:secret_word")
-    st.warning("Secret word discovered.")
-    st.warning("Werewolves vote to discover the seer.")
-    st.warning(f"Secret word: {secret_word}")
+    st.warning("✅ Secret word discovered.")
+    st.warning("🐺 Werewolves vote to discover the seer 🔮.")
+    st.warning(f"🔑 Secret word: {secret_word}")
 
 def Time(r,user,game_id):
     secret_word = r.get(f"game:{game_id}:secret_word")
-    st.warning("Secret word not discovered.")
-    st.warning("Villagers vote to discover at least 1 werewolf.")
-    st.warning(f"Secret word: {secret_word}")
+    st.warning("❌ Secret word not discovered.")
+    st.warning("👤 Villagers vote to discover at least 1 werewolf 🐺.")
+    st.warning(f"🔑 Secret word: {secret_word}")
 
 ###
 # Mayor Word Select + Pause Timer
