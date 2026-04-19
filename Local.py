@@ -98,8 +98,8 @@ with st.expander("Game", expanded=True):
     # -------------------------
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
-        Timer.Countdown(r, user, game_id)
         Werewords.MayorButtons(r,user,game_id)
+        Timer.Countdown(r, user, game_id)
     elif state=="times_up":
         secret_word = r.get(f"game:{game_id}:secret_word")
         st.warning("Secret word not discovered.")
