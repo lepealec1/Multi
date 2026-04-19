@@ -7,7 +7,7 @@ import uuid
 def init_user(r):
 
     if "name" not in st.session_state:
-        st.session_state.name = ""
+        st.session_state.name = "unknown"
 
     # -------------------------
     # INPUT

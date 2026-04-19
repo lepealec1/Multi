@@ -6,7 +6,11 @@ import random
 import os
 import Functions
 
-
+def load_words():
+    with open(WORDS_PATH, "r") as f:
+        return [w.strip() for w in f if w.strip()]
+    
+    
 def get_role(r, game_id, user):
 
     raw = r.hget(f"game:{game_id}:roles", user) 
@@ -202,7 +206,9 @@ def MayorSelectWord(r, user, game_id):
         for w in new_words:
             r.rpush(f"game:{game_id}:mayor_words", w)
 
-        st.rerun()# =========================
+        st.rerun()
+
+# =========================
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):
