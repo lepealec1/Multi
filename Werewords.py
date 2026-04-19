@@ -200,7 +200,7 @@ def RevealRoles(r, user, game_id):
             st.warning(f"🔮 These are all the seers: {', '.join(seers)}")
     elif role == "Villager":
         st.success("🏡👤 You are a villager.")
-        st.warning(f"Including you, There are {len(villagers)} villagers.")
+        st.warning(f"Including you, there are {len(villagers)} villagers.")
     elif role == "Mayor":
         st.success("🏡👤🏡👤 You are the mayor")
         st.warning(f"There are {len(villagers)} villagers.")
@@ -216,7 +216,7 @@ def RevealRoles(r, user, game_id):
     if role in ["Villager"]:
         st.write("Try to guess the secret word")
        
-    st.write(f"Public: there are ",len(werewolves)," werewloves.")
+    st.warning(f"Public: there are {len(werewolves)} werewolves.")
              
 # =========================
 # TIMER
@@ -240,24 +240,6 @@ def RenderTimer(r, user, game_id):
     st.subheader(f"⏱ {remaining//60:02d}:{remaining%60:02d}")
 
 
-# =========================
-# RUN BUTTON
-# =========================
-def RenderRunGameButton(r, user, game_id):
-    state = (r.get(f"game:{game_id}:state"))
-    secret = (r.get(f"game:{game_id}:secret_word")) or None
-    mayor = (r.get(f"game:{game_id}:mayor"))
-    if user != mayor:
-        return
-    can_start = (
-        state == "ready"
-        and secret is not None
-        and secret != ""
-        and secret.lower() != "none"
-    )
-    if st.button("▶ Run Game", disabled=not can_start):
-        r.set(f"game:{game_id}:run_requested", 1)
-        st.rerun()
 
 
 

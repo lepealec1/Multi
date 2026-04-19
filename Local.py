@@ -89,8 +89,6 @@ with st.expander("Game", expanded=True):
     # READY    mayor = r.get(f"game:{game_id}:mayor")
     # -------------------------
     elif state == "ready":
-        mayor = r.get(f"game:{game_id}:mayor")
-        st.success("Mayor:",mayor)
         Werewords.AssignRoles(r,user ,game_id)
         Werewords.MayorSelectWord(r,user,game_id)
 
@@ -98,6 +96,8 @@ with st.expander("Game", expanded=True):
     # WORD SELECTED
     # -------------------------
     elif state == "word_selected":
+        mayor = r.get(f"game:{game_id}:mayor")
+        st.success("Mayor:",mayor)
         Werewords.RevealRoles(r, user, game_id)
 
 LobbyFunctions.Reset(r,user,game_id)
