@@ -213,6 +213,7 @@ def view_lobbies(r):
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
+
 def SelectGame(r, user_id, game_id):
 
     host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))

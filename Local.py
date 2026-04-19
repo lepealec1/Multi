@@ -52,17 +52,17 @@ with st.expander("Multiplier Setup",expanded=True):
 
 LobbyFunctions.refresh_button()
 
-
-
-
-
-
-
 with st.expander("Game", expanded=True):
+    role = (r.hget(f"game:{game_id}:roles", user_id))
+    st.write("Raw ROLE:",role)
+    mode = (r.get(f"game:{game_id}:game_mode"))
+    state =(r.get(f"game:{game_id}:state"))
+    st.write("Raw mode:",mode)
+    st.write("Raw state:",state)
     role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
     mode = Functions.safe_decode(r.get(f"game:{game_id}:game_mode"))
     state = Functions.safe_decode(r.get(f"game:{game_id}:state"))
-    st.write(role)
+    st.write("ROLE:",role)
     st.write("RAW:", r.get(f"game:{game_id}:game_mode"))
     st.write("DECODED:", Functions.safe_decode(r.get(f"game:{game_id}:game_mode")))
     st.write(mode)
