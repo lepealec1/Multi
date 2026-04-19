@@ -54,9 +54,7 @@ def SelectMayor(r, user_id, game_id):
         key=f"mayor_select_{game_id}"
     )
 
-    selected_id = Functions.safe_decode(id_to_name[selected_name])
-
-    r.set(f"game:{game_id}:mayor", selected_id)
+    r.set(f"game:{game_id}:mayor", selected_name)
 
     st.session_state[f"mayor_{game_id}"] = selected_name
 
