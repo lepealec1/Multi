@@ -53,36 +53,46 @@ with st.expander("Multiplier Setup",expanded=True):
 LobbyFunctions.refresh_button()
 
 with st.expander("Game", expanded=True):
-    role = (r.hget(f"game:{game_id}:roles", user_id))
-    st.write("Raw ROLE:",role)
-    
-    state =(r.get(f"game:{game_id}:state"))
-    st.write("Raw state:",state)
-    role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-    state = Functions.safe_decode(r.get(f"game:{game_id}:state"))
-    st.write("ROLE:",role)
-    st.write("RAW:", r.get(f"game:{game_id}:game_mode"))
-    st.write("DECODED:", Functions.safe_decode(r.get(f"game:{game_id}:game_mode")))
-    mode = Functions.safe_decode(r.get(f"game:{game_id}:mode")) or "None"
-    st.write("Mode:",mode)
-    st.write("State:",state)
 
+    # -------------------------
+    # STATE (RAW + CLEAN)
+    # -------------------------
+    raw_state = r.get(f"game:{game_id}:state")
+    state = Functions.safe_decode(raw_state)
+
+    st.write("STATE:", state)
+
+    # -------------------------
+    # MODE (ONLY ONE KEY!)
+    # -------------------------
+    raw_mode = r.get(f"game:{game_id}:mode")
+    mode = Functions.safe_decode(raw_mode) or "None"
+
+    st.write("MODE:", mode)
+
+    # HARD STOP IF NOT GAME MODE
     if mode != "Werewords":
         st.stop()
 
     # -------------------------
+    # ROLE DEBUG
+    # -------------------------
+    raw_role = r.hget(f"game:{game_id}:roles", user_id)
+    role = Functions.safe_decode(raw_role)
+
+    st.write("ROLE:", role)
+
+    # -------------------------
     # LOBBY
     # -------------------------
-    if not state or state == "lobby":
+    if state in [None, "lobby"]:
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.StartSetup(r, user_id, game_id)
-    
 
     # -------------------------
     # READY
     # -------------------------
     elif state == "ready":
-        Werewords.MayorSelectWord(r, user_id, game_id)
         Werewords.RenderRunGameButton(r, user_id, game_id)
         Werewords.RunGame(r, user_id, game_id)
 
