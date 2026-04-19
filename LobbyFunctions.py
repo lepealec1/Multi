@@ -27,7 +27,7 @@ def init_user(r):
             user = key.split(":")[1]
 
             stored_name = r.hget(f"user:{user}", "name")
-            stored_name = stored_name.decode() if isinstance(stored_name, bytes) else stored_name
+            #stored_name = stored_name.decode() if isinstance(stored_name, bytes) else stored_name
 
             if stored_name == name:
                 found_user_id = user
