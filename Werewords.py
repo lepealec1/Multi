@@ -209,7 +209,7 @@ def RevealRoles(r, user, game_id):
     if role in ["Werewolf", "Seer", "Mayor"]:
         secret_word = r.get(f"game:{game_id}:secret_word")
         if secret_word:
-            st.write(f"🔑 Secret word: {secret_word}")
+            st.warning(f"🔑 Secret word: {secret_word}")
         else:
             st.write("No secret set yet")
     if role in ["Villager"]:

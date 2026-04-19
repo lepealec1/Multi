@@ -97,6 +97,8 @@ with st.expander("Game", expanded=True):
     # -------------------------
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
+        Werewords.RenderTimer(r, user, game_id)
+
 
 LobbyFunctions.Reset(r,user,game_id)
 
