@@ -206,7 +206,8 @@ def MayorSelectWord(r, user, game_id):
     # -------------------------
     # GET ROLE (CORRECT WAY)
     # -------------------------
-    role = get_role(r, game_id, user)
+    role = (r.get(f"game:{game_id}:role"))
+    st.write("RevealRoles Role:",role)
     st.write("=== RAW ROLES HASH ===")
     st.write(r.hgetall(f"game:{game_id}:roles"))
     st.write("MayorSelectWord ROLE:", role)
