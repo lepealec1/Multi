@@ -281,3 +281,74 @@ def RenderRunGameButton(r, user, game_id):
     if st.button("▶ Run Game", disabled=not can_start):
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
+
+
+def AssignRoles(r, user, game_id):
+    host_id = (r.get(f"game:{game_id}:host"))
+    if user != host_id:
+        return
+
+    # -------------------------
+    # LOAD SETTINGS
+    # -------------------------
+    settings = r.hgetall(f"game:{game_id}:settings")
+    settings = {
+        Functions.safe_decode(k): Functions.safe_decode(v)
+        for k, v in settings.items()
+    }
+
+    seer_count = int(settings.get("seer", 0))
+    werewolf_count = int(settings.get("werewolves", 0))
+
+    # -------------------------
+    # LOAD PLAYERS (NAMES)
+    # -------------------------
+    players = r.smembers(f"game:{game_id}:players")
+    players = [Functions.safe_decode(p) for p in players]
+
+    if len(players) < 4:
+        return "Not enough players"
+
+    random.shuffle(players)
+
+    roles = {}
+
+    # -------------------------
+    # MAYOR (FIRST PLAYER)
+    # -------------------------
+    mayor = players[0]
+    roles[mayor] = "Mayor"
+
+    idx = 1
+
+    # -------------------------
+    # SEER
+    # -------------------------
+    for _ in range(seer_count):
+        if idx < len(players):
+            roles[players[idx]] = "Seer"
+            idx += 1
+
+    # -------------------------
+    # WEREWOLVES
+    # -------------------------
+    for _ in range(werewolf_count):
+        if idx < len(players):
+            roles[players[idx]] = "Werewolf"
+            idx += 1
+
+    # -------------------------
+    # VILLAGERS
+    # -------------------------
+    for i in range(idx, len(players)):
+        roles[players[i]] = "Villager"
+
+    # -------------------------
+    # SAVE TO REDIS
+    # -------------------------
+    r.delete(f"game:{game_id}:roles")
+
+    for name, role in roles.items():
+        r.hset(f"game:{game_id}:roles", name, role)
+
+    return roles
