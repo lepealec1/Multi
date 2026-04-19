@@ -225,14 +225,7 @@ def SelectGame(r, user_id, game_id):
 
     current = Functions.safe_decode(r.get(f"game:{game_id}:mode")) or "None"
 
-    mode = st.radio(
-        "Select Game Mode",
-        options,
-        index=options.index(current) if current in options else 0,
-        key=f"game_mode_{game_id}"
-    )
-
-    if st.button("Set Game Mode"):
-        r.set(f"game:{game_id}:mode", mode)
-        st.success(f"Game mode set to {mode}")
+    if st.button("Set Werewords Mode"):
+        r.set(f"game:{game_id}:mode", "Werewords")
+        st.success("Game mode set to Werewords")
         st.rerun()
