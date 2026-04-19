@@ -201,7 +201,7 @@ def MayorSelectWord(r, user, game_id):
     for w in new_words:
         r.rpush(f"game:{game_id}:mayor_words", w)
 
-    if col1.button("Lock Word"):
+    if col1.button("Lock Word and Start Game"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
