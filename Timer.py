@@ -29,7 +29,7 @@ def Countdown(r, user, game_id):
     if state == "word_selected":
         st.subheader(f"⏱ {mins:02d}:{secs:02d}")
         st.caption(f"{remaining} seconds left")
-        time.sleep(1)
+        time.sleep(5)
         st.rerun()
     st.autorefresh(interval=1000, key="timer_refresh")
     
