@@ -3,6 +3,7 @@ import streamlit as st
 import time, uuid, redis
 import LobbyFunctions
 import admin
+import Timer
 import Werewords
 def safe_decode(x):
     return x.decode() if isinstance(x, bytes) else x
@@ -97,7 +98,26 @@ with st.expander("Game", expanded=True):
     # -------------------------
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
-        Werewords.RenderTimer(r, user, game_id)
+        timer_key = f"game:{game_id}:timer"
+
+        # -------------------------
+        # START TIMER ONCE ONLY
+        # -------------------------
+        if not r.exists(timer_key):
+
+            total_seconds = Timer.get_timer_seconds(r, game_id)
+
+        # safety check (prevents your "0 duration bug")
+        if total_seconds <= 0:
+            st.error("Invalid timer setup")
+        r.hset(timer_key, mapping={
+        "start_time": str(time.time()),
+        "duration": str(total_seconds)
+        })
+        # -------------------------
+        # ALWAYS RENDER TIMER
+        # -------------------------
+        Timer.RenderTimer(r,user,game_id)
 
 
 LobbyFunctions.Reset(r,user,game_id)
@@ -137,3 +157,4 @@ for key in r.keys("*"):
     # LIST
     elif value_type == "list":
         st.write([Functions.safe_decode(x) for x in r.lrange(key, 0, -1)])
+        
