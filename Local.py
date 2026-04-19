@@ -68,10 +68,6 @@ st.write("role:");
 st.write(role);
 
 
-
-
-
-
 with st.expander("Game", expanded=True):
     raw_state = r.get(f"game:{game_id}:state")
     state = safe_decode(raw_state)

@@ -204,15 +204,16 @@ def RunGame(r, user_id, game_id):
 # MAYOR WORD PICK
 # =========================
 def MayorSelectWord(r, user_id, game_id):
-
+    st.write("Select Word1")
     state = norm(r.get(f"game:{game_id}:state"))
+    st.write("Select Word2")
     if state != "started":
         return
-
+    st.write("Select Word3")
     role = get_role(r, game_id, user_id)
     if role != "Mayor":
         return
-
+    st.write("Select Word4")
     words = [norm(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
 
     st.subheader("👑 Pick Secret Word")
