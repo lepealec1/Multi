@@ -104,7 +104,7 @@ with st.expander("Game", expanded=True):
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
 
-LobbyFunctions.Reset()
+LobbyFunctions.Reset(r,user,game_id)
 
 
 
