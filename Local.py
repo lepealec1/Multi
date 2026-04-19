@@ -101,16 +101,10 @@ with st.expander("Game", expanded=True):
         Werewords.MayorButtons(r,user,game_id)
         Timer.Countdown(r, user, game_id)
     elif state=="times_up":
-        secret_word = r.get(f"game:{game_id}:secret_word")
-        st.warning("Secret word not discovered.")
-        st.warning("Villagers vote to discover at least 1 werewolf.")
-        st.warning(f"Secret word:",secret_word)
+        Werewords.Time(r,user,game_id)
     elif state=="paused":
         Werewords.Paused(r,user,game_id)
-#        secret_word = r.get(f"game:{game_id}:secret_word")
- #       st.warning("Secrete word discovered.")
-  #      st.warning("Werewolves vote to discover the seer.")
-   #     st.warning(f"Secret word:",secret_word)
+
 
 
 
@@ -119,36 +113,3 @@ LobbyFunctions.Reset(r,user,game_id)
 
 
 
-st.write("=== ALL REDIS KEYS ===")
-st.write(r.keys("*"))
-
-
-st.subheader("🧠 FULL REDIS DUMP")
-
-for key in r.keys("*"):
-
-    key_str = Functions.safe_decode(key)
-    value_type = r.type(key).decode() if isinstance(r.type(key), bytes) else r.type(key)
-
-    st.write(f"### {key_str} ({value_type})")
-
-    # STRING
-    if value_type == "string":
-        st.write(Functions.safe_decode(r.get(key)))
-
-    # SET
-    elif value_type == "set":
-        st.write([Functions.safe_decode(x) for x in r.smembers(key)])
-
-    # HASH
-    elif value_type == "hash":
-        raw = r.hgetall(key)
-        st.write({
-            Functions.safe_decode(k): Functions.safe_decode(v)
-            for k, v in raw.items()
-        })
-
-    # LIST
-    elif value_type == "list":
-        st.write([Functions.safe_decode(x) for x in r.lrange(key, 0, -1)])
-        
