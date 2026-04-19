@@ -202,19 +202,13 @@ def MayorSelectWord(r, user, game_id):
 
     if state != "ready":
         return
-
     # -------------------------
     # GET ROLE (CORRECT WAY)
     # -------------------------
-    role = (r.get(f"game:{game_id}:role"))
-    st.write("RevealRoles Role:",role)
-    st.write("=== RAW ROLES HASH ===")
-    st.write(r.hgetall(f"game:{game_id}:roles"))
-    st.write("MayorSelectWord ROLE:", role)
-
-    if role != "Mayor":
+    mayor = (r.get(f"game:{game_id}:mayor"))
+    st.write("RevealRoles Role:",mayor)
+    if user != mayor:
         return
-
     # -------------------------
     # WORDS
     # -------------------------
