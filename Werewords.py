@@ -254,11 +254,12 @@ def MayorSelectWord(r, user, game_id):
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):
-
-    state = Functions.norm(r.get(f"game:{game_id}:state"))
+    st.write("RevealRoles")
+    state = (r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
     role = (r.get(f"game:{game_id}:role"))
+    st.write("RevealRoles Role:",role)
     secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
 
     st.subheader("🎭 Role")
