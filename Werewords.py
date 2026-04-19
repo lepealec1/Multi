@@ -247,7 +247,7 @@ def RenderTimer(r, user, game_id):
     remaining = int(duration - (time.time() - start))
 
     if remaining <= 0:
-        r.set(f"game:{game_id}:state", "ended")
+        #r.set(f"game:{game_id}:state", "ended")
         st.warning("⏰ Time up!")
         return
 
@@ -325,4 +325,4 @@ def AssignRoles(r, user, game_id):
 
 def get_timer_seconds(r, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
-    return int(settings.get(b"timer_seconds", b"0").decode())
+    return int(settings.get(b"timer_seconds", b"0"))
