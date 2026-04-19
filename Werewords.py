@@ -231,7 +231,6 @@ def RevealRoles(r, user, game_id):
         secret = r.get(f"game:{game_id}:secret")
 
         if secret:
-            secret = secret.decode()
             st.write(f"🔑 Secret word: {secret}")
         else:
             st.write("No secret set yet")
