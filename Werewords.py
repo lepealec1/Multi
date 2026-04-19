@@ -101,6 +101,7 @@ def StartSetup(r, user_id, game_id):
 
         r.set(f"game:{game_id}:state", "ready")
         st.success("Game ready!")
+        st.rerun()
 
 
 # =========================
@@ -296,8 +297,9 @@ def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
+    role = Functions.norm(r.get(f"game:{game_id}:role"))
 
-    if host != user_id:
+    if host != "Mayor":
         return
 
     if st.button("▶ Run Game", disabled=(state != "ready")):
