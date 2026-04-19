@@ -304,7 +304,7 @@ def MayorButtons(r, user, game_id):
         r.set(f"game:{game_id}:state", "discovered")
     if st.button("Time is up!", key=f"{game_id}_time"):
         r.set(f"game:{game_id}:state", "times_up")
-    if st.button("No more tokens!", key=f"{game_id}_time"):
+    if st.button("No more tokens!", key=f"{game_id}_tokens"):
         r.set(f"game:{game_id}:state", "no_tokens")
     st.rerun()
         
