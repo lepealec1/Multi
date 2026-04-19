@@ -211,7 +211,7 @@ def RunGame(r, user_id, game_id):
 def MayorSelectWord(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
-    st.write("STATE:", state)
+    st.write("MayorSelectWord STATE:", state)
 
     if state != "ready":
         return
@@ -220,7 +220,7 @@ def MayorSelectWord(r, user_id, game_id):
     # GET ROLE (CORRECT WAY)
     # -------------------------
     role = get_role(r, game_id, user_id)
-    st.write("ROLE:", role)
+    st.write("MayorSelectWord ROLE:", role)
 
     if role != "Mayor":
         return
