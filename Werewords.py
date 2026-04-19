@@ -17,7 +17,6 @@ def get_role(r, game_id, user_id):
 # MAYOR SELECTION
 # =========================
 def SelectMayor(r, user_id, game_id):
-
     host_id = Functions.norm(r.get(f"game:{game_id}:host"))
     if user_id != host_id:
         return
@@ -70,7 +69,7 @@ def StartSetup(r, user_id, game_id):
     player_count = len(player_ids)
 
     if player_count < 3:
-        st.warning("Need at least 4 players")
+        st.warning("Need at least 3 players")
         return
 
     st.subheader("⚙ Setup Game")
@@ -125,7 +124,7 @@ def RunGame(r, user_id, game_id):
     # -------------------------
     player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
 
-    if len(player_ids) < 4:
+    if len(player_ids) < 3:
         return
 
     # -------------------------
