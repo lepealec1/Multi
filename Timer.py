@@ -29,8 +29,8 @@ def Countdown(r, user, game_id):
     raw_state = r.get(f"game:{game_id}:state")
     state = Functions.safe_decode(raw_state)
     if state == "word_selected":
-        st.subheader(f"⏱ {mins:02d}:{secs:02d}")
-        st.caption(f"{remaining} seconds left")
+        st.write(f"⏱ {mins:02d}:{secs:02d}")
+        st.write(f"{remaining} seconds left")
         time.sleep(10)
         st.rerun()
     
