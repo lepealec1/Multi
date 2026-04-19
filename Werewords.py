@@ -297,7 +297,7 @@ def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
-    secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
+    secret = Functions.norm(r.get(f"game:{game_id}:secret_word")) or None
 
     # DEBUG (optional)
     st.write("SECRET:", secret)
@@ -313,7 +313,6 @@ def RenderRunGameButton(r, user_id, game_id):
         and secret != ""
         and secret.lower() != "none"
     )
-
     if st.button("▶ Run Game", disabled=not can_start):
 
         r.set(f"game:{game_id}:run_requested", 1)
