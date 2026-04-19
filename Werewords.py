@@ -119,9 +119,12 @@ def MayorSelectWord(r, user, game_id):
     st.subheader("👑 Pick Secret Word")
     
     col1, col2 = st.columns(2)
-    chosen = st.selectbox("Word", words + ["Custom Word"])
-    if chosen == "Custom Word":
+    use_custom = st.checkbox("Use custom word")
+
+    if use_custom:
         chosen = st.text_input("Enter custom word")
+    else:
+        chosen = st.selectbox("Word", words)   
     if col1.button("Lock Word and Run Game"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
