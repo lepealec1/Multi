@@ -169,44 +169,40 @@ def RunGame(r, user, game_id):
 # =========================
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
-    state = (r.get(f"game:{game_id}:state"))
+    state = r.get(f"game:{game_id}:state")
     st.write("MayorSelectWord STATE:", state)
 
     if state != "ready":
         return
-    # -------------------------
-    # GET ROLE (CORRECT WAY)
-    # -------------------------
-    mayor = (r.get(f"game:{game_id}:mayor"))
-    st.write("RevealRoles Role:",mayor)
+
+    mayor = r.get(f"game:{game_id}:mayor")
+    st.write("RevealRoles Role:", mayor)
+
     if user != mayor:
         return
-    # -------------------------
-    # WORDS
-    # -------------------------
-    words = [
-        (w)
-        for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)
-    ]
+
+    words = r.lrange(f"game:{game_id}:mayor_words", 0, -1)
+    words = [w.decode() if isinstance(w, bytes) else w for w in words]
+
     st.subheader("👑 Pick Secret Word")
-    
+
     col1, col2 = st.columns(2)
     chosen = st.selectbox("Word", words)
+
     if col1.button("Lock Word"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
+
     if col2.button("Randomize Words"):
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
-        with open(WORDS_PATH, "r") as f:
-            all_words = [w.strip() for w in f if w.strip()]
+        all_words = load_words()
         new_words = random.sample(all_words, min(10, len(all_words)))
+
         r.delete(f"game:{game_id}:mayor_words")
         for w in new_words:
             r.rpush(f"game:{game_id}:mayor_words", w)
-        st.rerun()
-# =========================
+
+        st.rerun()# =========================
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):

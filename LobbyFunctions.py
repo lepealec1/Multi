@@ -243,7 +243,7 @@ def Reset(r, user, game_id):
     if user != host_id:
         return
 
-    if st.button("🔄 Reset Roles"):
+    if st.button("🔄 Reset Game"):
         r.delete(f"game:{game_id}:roles_assigned")
         r.delete(f"game:{game_id}:roles_lock")   # if using lock
         r.delete(f"game:{game_id}:roles")
