@@ -3,9 +3,11 @@ import streamlit as st
 
 def RenderTimer(r, user, game_id):
 
-    data = r.hgetall(f"game:{game_id}:timer_seconds")
-    st.write(data)
-    if not data:
+    settings = r.hgetall(f"game:{game_id}:settings")
+    settings = {k: v for k, v in settings.items()}
+    timer_seconds = int(settings.get("timer_counter", 0))
+    st.write(timer_seconds)
+    if not timer_seconds:
         return
 
     start = float(data.get(b"start_time", b"0"))
