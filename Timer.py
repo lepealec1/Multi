@@ -1,3 +1,4 @@
+from streamlit.runtime.scriptrunner import add_script_run_ctx
 import streamlit as st
 import time
 
