@@ -1,10 +1,11 @@
+import Functions
 import streamlit as st
 import time
 
 def Countdown(r, user, game_id):
-    settings = r.hgetall(f"game:{game_id}:settings")
-    timer_seconds = int(settings.get("timer_seconds", 300))
-
+    #settings = r.hgetall(f"game:{game_id}:settings")
+    #timer_seconds = int(settings.get("timer_seconds", 300))
+    timer_seconds=300
     if "start_time" not in st.session_state:
         st.session_state.start_time = time.time()
 
