@@ -202,7 +202,7 @@ def MayorSelectWord(r, user_id, game_id):
     st.write("Select Word3")
     role = Functions.norm(r.get(f"game:{game_id}:role"))
     st.write("Role1:",role)
-    role = Functions.norm(r.get(f"game:{game_id}:role"))
+    role = Functions.safe_decode(r.get(f"game:{game_id}:role"))
     st.write("Role2:",role)
     
     role = get_role(r, game_id, user_id)
