@@ -8,8 +8,8 @@ def RenderTimer(r, user, game_id):
     if not data:
         return
 
-    start = float(data.get(b"start_time", b"0").decode())
-    duration = int(data.get(b"duration", b"0").decode())
+    start = float(data.get(b"start_time", b"0"))
+    duration = int(data.get(b"duration", b"0"))
 
     elapsed = time.time() - start
     remaining = int(duration - elapsed)
