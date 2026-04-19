@@ -53,20 +53,14 @@ LobbyFunctions.refresh_button()
 
 
 
-role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-st.write(role)
-
-
 
 
 
 
 with st.expander("Game", expanded=True):
-    state = r.get(f"game:{game_id}:role")
-    st.write("STATE:")
-    st.write(state)
-    mode = st.session_state.get("game_mode")
-    st.write("mode:")
+    role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+    mode = Werewords.safe_decode(r.get(f"game:{game_id}:mode"))
+    st.write(role)
     st.write(mode)
     if mode != "Werewords":
         st.stop()
