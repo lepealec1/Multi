@@ -197,7 +197,7 @@ def MayorSelectWord(r, user_id, game_id):
     st.write("Select Word1")
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     st.write("Select Word2")
-    if state != "started":
+    if state != "ready":
         return
     st.write("Select Word3")
     role = get_role(r, game_id, user_id)
@@ -256,7 +256,7 @@ def RevealRoles(r, user_id, game_id):
 
     if role == "Seer":
         st.info("🔮 Seer Hint")
-        st.write(f"Length: {len(secret)}")
+        st.write(secret)
 
     elif role == "Werewolf":
         st.warning("🐺 Werewolf")
@@ -297,7 +297,6 @@ def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
-    
     secret = Functions.norm(r.get(f"game:{game_id}:secret_word")) or None
 
     # DEBUG (optional)

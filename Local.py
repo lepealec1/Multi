@@ -85,10 +85,6 @@ with st.expander("Game", expanded=True):
         Werewords.MayorSelectWord(r, user_id, game_id)
         Werewords.RenderRunGameButton(r, user_id, game_id)
         Werewords.RunGame(r, user_id, game_id)
-        
-    # -------------------------
-    # STARTED
-    # -------------------------
 
     # -------------------------
     # WORD SELECTED
