@@ -209,7 +209,7 @@ def RevealRoles(r, user, game_id):
     if role in ["Werewolf", "Seer", "Mayor"]:
         secret_word = r.get(f"game:{game_id}:secret_word")
         if secret_word:
-            st.warning(f"🔑 Secret word: {secret_word}")
+            st.error(f"🔑 Secret word: {secret_word}")
         else:
             st.write("No secret set yet")
     if role in ["Villager"]:
@@ -223,21 +223,25 @@ def RevealRoles(r, user, game_id):
 def RenderTimer(r, user, game_id):
 
     data = r.hgetall(f"game:{game_id}:timer")
+    st.write("RenderTimer:" data)
     if not data:
         return
 
-    start = float((data.get(b"start_time", 0)))
-    duration = int((data.get(b"duration", 0)))
+    def decode(x, default="0"):
+        if x is None:
+            return default
+        return x.decode() if isinstance(x, bytes) else str(x)
+
+    start = float(decode(data.get(b"start_time")))
+    duration = int(decode(data.get(b"duration")))
 
     remaining = int(duration - (time.time() - start))
-
     if remaining <= 0:
         r.set(f"game:{game_id}:state", "ended")
-        st.warning("Time up!")
+        st.warning("⏰ Time up!")
         return
 
     st.subheader(f"⏱ {remaining//60:02d}:{remaining%60:02d}")
-
 
 
 
