@@ -31,6 +31,7 @@ def Countdown(r, user, game_id):
     if state == "word_selected":
         st.write(f"⏱ {mins:02d}:{secs:02d}")
         st.write(f"{remaining} seconds left")
-        time.sleep(30)
-        st.rerun()
+        st.autorefresh(interval=1000, key="timer_refresh")
+     #   time.sleep(30)
+    #    st.rerun()
     
