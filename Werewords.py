@@ -159,21 +159,16 @@ def RunGame(r, user, game_id):
     # -------------------------
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
-
     with open(WORDS_PATH, "r") as f:
         words = [w.strip() for w in f if w.strip()]
-
     mayor_words = random.sample(words, min(10, len(words)))
-
     r.delete(f"game:{game_id}:mayor_words")
     for w in mayor_words:
         r.rpush(f"game:{game_id}:mayor_words", w)
-
     st.rerun()
 # =========================
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
-
     state = (r.get(f"game:{game_id}:state"))
     st.write("MayorSelectWord STATE:", state)
 
@@ -194,13 +189,14 @@ def MayorSelectWord(r, user, game_id):
         for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)
     ]
     st.subheader("👑 Pick Secret Word")
+    
     col1, col2 = st.columns(2)
     chosen = st.selectbox("Word", words)
     if col1.button("Lock Word"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
-    if col2.button("Re-roll"):
+    if col2.button("Randomize Words"):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
         with open(WORDS_PATH, "r") as f:
