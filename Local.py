@@ -86,13 +86,13 @@ with st.expander("Game", expanded=True):
         Werewords.StartSetup(r, user, game_id)
 
     # -------------------------
-    # READY
+    # READY    mayor = r.get(f"game:{game_id}:mayor")
     # -------------------------
     elif state == "ready":
+        mayor = r.get(f"game:{game_id}:mayor")
+        st.success("Mayor:",mayor)
         Werewords.AssignRoles(r,user ,game_id)
         Werewords.MayorSelectWord(r,user,game_id)
-        #Werewords.RenderRunGameButton(r, user, game_id)
-        #Werewords.RunGame(r, user, game_id)
 
     # -------------------------
     # WORD SELECTED
