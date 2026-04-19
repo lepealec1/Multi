@@ -303,9 +303,9 @@ def AssignRoles(r, user, game_id):
     # -------------------------
     # LOAD PLAYERS (NAMES)
     # -------------------------
+    mayor = Functions.safe_decode(r.get(f"game:{game_id}:mayor"))
     players = r.smembers(f"game:{game_id}:players")
-    players = [Functions.safe_decode(p) for p in players]
-
+    players = [p for p in players if p != mayor]
     if len(players) < 4:
         return "Not enough players"
 
