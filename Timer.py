@@ -3,37 +3,37 @@ import time
 
 def Countdown():
 
-    duration = 300  # 5 minutes
+    duration = 300
 
     # -------------------------
-    # lock start time once
+    # LOCK START TIME ONCE
     # -------------------------
-    if "start_time" not in st.session_state:
+    if "start_time" not in st.session_state or st.session_state.start_time is None:
         st.session_state.start_time = time.time()
 
-    # -------------------------
-    # math
-    # -------------------------
     elapsed = time.time() - st.session_state.start_time
     remaining = int(duration - elapsed)
 
     # -------------------------
-    # time up
+    # DEBUG (IMPORTANT)
+    # -------------------------
+    st.write("start:", st.session_state.start_time)
+    st.write("elapsed:", elapsed)
+    st.write("remaining:", remaining)
+
+    # -------------------------
+    # TIME UP
     # -------------------------
     if remaining <= 0:
         st.warning("⏰ Time up!")
         return
 
     # -------------------------
-    # display
+    # DISPLAY
     # -------------------------
-    mins = remaining // 60
-    secs = remaining % 60
-
-    st.subheader(f"⏱ {mins:02d}:{secs:02d}")
-    st.caption(f"{remaining} seconds left")
+    st.subheader(f"{remaining//60:02d}:{remaining%60:02d}")
 
     # -------------------------
-    # auto refresh
+    # AUTO REFRESH
     # -------------------------
     st.autorefresh(interval=1000, key="timer_refresh")
