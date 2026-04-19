@@ -31,7 +31,6 @@ def Countdown(r, user, game_id):
         st.caption(f"{remaining} seconds left")
         time.sleep(5)
         st.rerun()
-    st.autorefresh(interval=1000, key="timer_refresh")
     
 def RenderTimer(r, user, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
