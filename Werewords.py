@@ -138,18 +138,12 @@ def MayorSelectWord(r, user, game_id):
         r.rpush(f"game:{game_id}:mayor_words", w)
 
     if col1.button("Lock Word and Start Game"):
-
-        total_seconds = get_timer_seconds(r, game_id)
-
+        
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
-
-        r.hset(f"game:{game_id}:timer", mapping={
-            "start_time": str(time.time()),
-            "duration": str(total_seconds)
-        })
-
+        
         st.rerun()
+
     if col2.button("Randomize Words"):
         all_words = load_words()
         new_words = random.sample(all_words, min(10, len(all_words)))
@@ -324,9 +318,3 @@ def AssignRoles(r, user, game_id):
         r.hset(f"game:{game_id}:roles", name, role)
 
 
-def get_game_time(r, game_id):
-    settings = r.hgetall(f"game:{game_id}:settings")
-
-    total_seconds = int(settings.get(b"timer_seconds", b"0").decode())
-
-    return total_seconds, total_seconds // 60, total_seconds % 60
