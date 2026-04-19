@@ -323,10 +323,6 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
-
-def get_game_time(r, game_id):
+def get_timer_seconds(r, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
-
-    total_seconds = int(settings.get(b"timer_seconds", b"0").decode())
-
-    return total_seconds, total_seconds // 60, total_seconds % 60
+    return int(settings.get(b"timer_seconds", b"0").decode())
