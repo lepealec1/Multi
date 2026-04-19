@@ -34,20 +34,20 @@ if current != st.session_state.last_version:
 admin.clear_db(r)
 
 with st.expander("Multiplier Setup",expanded=True):
-    user_id, display_name = LobbyFunctions.init_user(r)
+    user, display_name = LobbyFunctions.init_user(r)
     LobbyFunctions.view_lobbies(r)
 
-    LobbyFunctions.create_game(r, user_id)
+    LobbyFunctions.create_game(r, user)
 
-    LobbyFunctions.render_lobby(r, user_id)
+    LobbyFunctions.render_lobby(r, user)
 
-    LobbyFunctions.leave_game(r, user_id)
+    LobbyFunctions.leave_game(r, user)
 
-    LobbyFunctions.delete_lobby(r, user_id)
+    LobbyFunctions.delete_lobby(r, user)
     game_id = st.session_state.get("game_id")
 
     if game_id:
-        LobbyFunctions.SelectGame(r, user_id, game_id)  
+        LobbyFunctions.SelectGame(r, user, game_id)  
 
 
 LobbyFunctions.refresh_button()
@@ -77,7 +77,7 @@ with st.expander("Game", expanded=True):
     # -------------------------
     # ROLE DEBUG
     # -------------------------
-    raw_role = r.hget(f"game:{game_id}:roles", user_id)
+    raw_role = r.hget(f"game:{game_id}:roles", user)
     role = Functions.safe_decode(raw_role)
 
     st.write("ROLE:", role)
@@ -86,21 +86,21 @@ with st.expander("Game", expanded=True):
     # LOBBY
     # -------------------------
     if state in [None, "lobby"]:
-        Werewords.SelectMayor(r, user_id, game_id)
-        Werewords.StartSetup(r, user_id, game_id)
+        Werewords.SelectMayor(r, user, game_id)
+        Werewords.StartSetup(r, user, game_id)
 
     # -------------------------
     # READY
     # -------------------------
     elif state == "ready":
-        Werewords.RenderRunGameButton(r, user_id, game_id)
-        Werewords.RunGame(r, user_id, game_id)
+        Werewords.RenderRunGameButton(r, user, game_id)
+        Werewords.RunGame(r, user, game_id)
 
     # -------------------------
     # WORD SELECTED
     # -------------------------
     elif state == "word_selected":
-        Werewords.RevealRoles(r, user_id, game_id)
+        Werewords.RevealRoles(r, user, game_id)
 
 
 

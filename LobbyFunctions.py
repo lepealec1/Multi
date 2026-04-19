@@ -8,8 +8,8 @@ import uuid
 def init_user(r):
 
     # --- SESSION USER ID ---
-    if "user_id" not in st.session_state:
-        st.session_state.user_id = None
+    if "user" not in st.session_state:
+        st.session_state.user = None
 
     # --- NAME INPUT ---
     name = st.text_input("Enter your name", value=st.session_state.get("name", ""))
@@ -24,39 +24,39 @@ def init_user(r):
         found_user_id = None
 
         for key in keys:
-            user_id = key.split(":")[1]
+            user = key.split(":")[1]
 
-            stored_name = r.hget(f"user:{user_id}", "name")
+            stored_name = r.hget(f"user:{user}", "name")
             stored_name = stored_name.decode() if isinstance(stored_name, bytes) else stored_name
 
             if stored_name == name:
-                found_user_id = user_id
+                found_user_id = user
                 break
 
         # ✅ EXISTING USER → LOAD IT
         if found_user_id:
-            st.session_state.user_id = found_user_id
+            st.session_state.user = found_user_id
 
         # 🆕 NEW USER → CREATE IT
         else:
             new_id = str(uuid.uuid4())[:8]
-            st.session_state.user_id = new_id
+            st.session_state.user = new_id
 
             r.hset(f"user:{new_id}", mapping={
                 "name": name
             })
 
     # fallback display id
-    user_id = st.session_state.user_id or "unknown"
+    user = st.session_state.user or "unknown"
 
-    display_name = st.session_state.name.strip() if st.session_state.name else user_id
+    display_name = st.session_state.name.strip() if st.session_state.name else user
 
     st.write(f"👤 You are: **{display_name}**")
 
-    return user_id, display_name
+    return user, display_name
 
 
-def create_game(r, user_id):
+def create_game(r, user):
     st.subheader("Create Game")
 
     # 🚫 BLOCK if already in a lobby
@@ -69,8 +69,8 @@ def create_game(r, user_id):
     if st.button("Create Game"):
         if game_id:
             r.set(f"game:{game_id}:exists", 1)
-            r.set(f"game:{game_id}:host", user_id)
-            r.sadd(f"game:{game_id}:players", user_id)
+            r.set(f"game:{game_id}:host", user)
+            r.sadd(f"game:{game_id}:players", user)
 
             st.session_state.game_id = game_id
             st.rerun()
@@ -79,7 +79,7 @@ def create_game(r, user_id):
 
 
 
-def render_lobby(r, user_id):
+def render_lobby(r, user):
     if "game_id" not in st.session_state:
         return
 
@@ -89,7 +89,7 @@ def render_lobby(r, user_id):
     st.subheader(f"🎮 Lobby: {game_id}")
 
     host_id = r.get(f"game:{game_id}:host")
-    r.sadd(f"game:{game_id}:players", user_id)
+    r.sadd(f"game:{game_id}:players", user)
 
     players = list(r.smembers(f"game:{game_id}:players"))
 
@@ -104,20 +104,20 @@ def render_lobby(r, user_id):
         col1, col2 = st.columns([3, 1])
 
         with col1:
-            label = f"🟢 {pname} (you)" if p == user_id else f"⚪ {pname}"
+            label = f"🟢 {pname} (you)" if p == user else f"⚪ {pname}"
             if p == host_id:
                 label += " 👑"
             st.write(label)
 
         with col2:
-            if user_id == host_id and p != user_id:
+            if user == host_id and p != user:
                 if st.button("❌ Remove", key=f"kick_{p}"):
                     r.srem(f"game:{game_id}:players", p)
                     st.rerun()
 
 
 
-def leave_game(r, user_id):
+def leave_game(r, user):
     if "game_id" not in st.session_state:
         return
 
@@ -125,9 +125,9 @@ def leave_game(r, user_id):
     host_id = r.get(f"game:{game_id}:host")
 
     if st.button("🚪 Leave Game"):
-        r.srem(f"game:{game_id}:players", user_id)
+        r.srem(f"game:{game_id}:players", user)
 
-        if user_id == host_id:
+        if user == host_id:
             r.delete(f"game:{game_id}:host")
 
         del st.session_state.game_id
@@ -135,14 +135,14 @@ def leave_game(r, user_id):
 
 
 
-def delete_lobby(r, user_id):
+def delete_lobby(r, user):
     if "game_id" not in st.session_state:
         return
 
     game_id = st.session_state.game_id
     host_id = r.get(f"game:{game_id}:host")
 
-    if user_id != host_id:
+    if user != host_id:
         return
 
     confirm = st.checkbox("I understand this will reset the lobby")
@@ -193,7 +193,7 @@ def view_lobbies(r):
         with col4:
             if st.button("Join", key=f"join_{game_id}"):
                 st.session_state.game_id = game_id
-                r.sadd(f"game:{game_id}:players", st.session_state.user_id)
+                r.sadd(f"game:{game_id}:players", st.session_state.user)
                 st.rerun()
 
         # -------------------------
@@ -214,11 +214,11 @@ def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
 
-def SelectGame(r, user_id, game_id):
+def SelectGame(r, user, game_id):
 
-    host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))
+    host = (r.get(f"game:{game_id}:host"))
 
-    if user_id != host_id:
+    if user != host:
         return
 
     options = ["None", "Werewords"]

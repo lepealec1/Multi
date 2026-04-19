@@ -7,20 +7,18 @@ import os
 import Functions
 
 
-def get_role(r, game_id, user_id):
+def get_role(r, game_id, user):
 
-    raw = r.hget(f"game:{game_id}:roles", user_id)
-
-    return Functions.safe_decode(raw) if raw else None
+    raw = r.hget(f"game:{game_id}:roles", user) 
+    return raw
 
 # =========================
 # MAYOR SELECTION
 # =========================
-def SelectMayor(r, user_id, game_id):
+def SelectMayor(r, user, game_id):
 
     host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))
-
-    if user_id != host_id:
+    if user != host_id:
         return
 
     raw_players = r.smembers(f"game:{game_id}:players")
@@ -63,10 +61,10 @@ def SelectMayor(r, user_id, game_id):
 # =========================
 # SETUP
 # =========================
-def StartSetup(r, user_id, game_id):
+def StartSetup(r, user, game_id):
 
     host = Functions.norm(r.get(f"game:{game_id}:host"))
-    if host != user_id:
+    if host != user:
         return
 
     player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
@@ -111,13 +109,13 @@ def StartSetup(r, user_id, game_id):
 # =========================
 # RUN GAME
 # =========================
-def RunGame(r, user_id, game_id):
+def RunGame(r, user, game_id):
 
     if not r.get(f"game:{game_id}:run_requested"):
         return
 
     host = Functions.norm(r.get(f"game:{game_id}:host"))
-    if user_id != host:
+    if user != host:
         return
 
     r.delete(f"game:{game_id}:run_requested")
@@ -196,7 +194,7 @@ def RunGame(r, user_id, game_id):
 
 # =========================
 # MAYOR WORD PICK
-def MayorSelectWord(r, user_id, game_id):
+def MayorSelectWord(r, user, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     st.write("MayorSelectWord STATE:", state)
@@ -207,7 +205,7 @@ def MayorSelectWord(r, user_id, game_id):
     # -------------------------
     # GET ROLE (CORRECT WAY)
     # -------------------------
-    role = get_role(r, game_id, user_id)
+    role = get_role(r, game_id, user)
     st.write("=== RAW ROLES HASH ===")
     st.write(r.hgetall(f"game:{game_id}:roles"))
     st.write("MayorSelectWord ROLE:", role)
@@ -254,13 +252,13 @@ def MayorSelectWord(r, user_id, game_id):
 # =========================
 # REVEAL ROLES
 # =========================
-def RevealRoles(r, user_id, game_id):
+def RevealRoles(r, user, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
 
-    role = get_role(r, game_id, user_id)
+    role = get_role(r, game_id, user)
     secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
 
     st.subheader("🎭 Role")
@@ -288,7 +286,7 @@ def RevealRoles(r, user_id, game_id):
 # =========================
 # TIMER
 # =========================
-def RenderTimer(r, user_id, game_id):
+def RenderTimer(r, user, game_id):
 
     data = r.hgetall(f"game:{game_id}:timer")
     if not data:
@@ -310,7 +308,7 @@ def RenderTimer(r, user_id, game_id):
 # =========================
 # RUN BUTTON
 # =========================
-def RenderRunGameButton(r, user_id, game_id):
+def RenderRunGameButton(r, user, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
@@ -320,7 +318,7 @@ def RenderRunGameButton(r, user_id, game_id):
     st.write("SECRET:", secret)
 
     # only host sees button
-    if host != user_id:
+    if host != user:
         return
 
     # better validation
