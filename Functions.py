@@ -3,6 +3,7 @@ def safe_decode(x):
 
 
 def norm(x):
+    if x is None:
+        return None
     return safe_decode(x).strip()
-
 
