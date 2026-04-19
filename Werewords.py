@@ -183,7 +183,10 @@ def RevealRoles(r, user, game_id):
         return
     if role == "Werewolf":
         st.success("🐺🌕 You are a Werewolf.")
-        st.success(f"🐺 Werewolves: {', '.join(werewolves)}")
+        if len(werewolves)==1:
+            st.success("You are the lone werewolf.")
+        if len(werewolves)>1:
+            st.success(f"🐺 These are all the werewolves: {', '.join(werewolves)}")
     elif role == "Seer":
         st.success("🔮👁 You are a seer.")
     elif role == "Werewolf":
