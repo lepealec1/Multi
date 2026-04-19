@@ -288,7 +288,6 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
-def
 
 ###
 # Mayor Word Select + Pause Timer
