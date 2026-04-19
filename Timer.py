@@ -1,10 +1,11 @@
+import Functions
 import time
 import streamlit as st
 
 import time
 import streamlit as st
 
-def countdown(r, user, game_id):
+def Countdown(r, user, game_id):
     if "start_time" not in st.session_state:
         st.session_state.start_time = time.time()
     settings = r.hgetall(f"game:{game_id}:settings")
@@ -22,9 +23,11 @@ def countdown(r, user, game_id):
 
     mins = remaining // 60
     secs = remaining % 60
-
-    st.subheader(f"⏱ {mins:02d}:{secs:02d}")
-    st.caption(f"{remaining} seconds left")
+    raw_state = r.get(f"game:{game_id}:state")
+    state = Functions.safe_decode(raw_state)
+    if state == "word_selected":
+        st.subheader(f"⏱ {mins:02d}:{secs:02d}")
+        st.caption(f"{remaining} seconds left")
 
 def RenderTimer(r, user, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
