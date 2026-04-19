@@ -4,7 +4,7 @@ import streamlit as st
 def RenderTimer(r, user, game_id):
 
     data = r.hgetall(f"game:{game_id}:timer")
-
+    st.write(data)
     if not data:
         return
 
