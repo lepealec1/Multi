@@ -311,9 +311,9 @@ def RenderTimer(r, user, game_id):
 # =========================
 def RenderRunGameButton(r, user, game_id):
 
-    state = Functions.norm(r.get(f"game:{game_id}:state"))
-    host = Functions.norm(r.get(f"game:{game_id}:host"))
-    secret = Functions.norm(r.get(f"game:{game_id}:secret_word")) or None
+    state = (r.get(f"game:{game_id}:state"))
+    host = (r.get(f"game:{game_id}:host"))
+    secret = (r.get(f"game:{game_id}:secret_word")) or None
 
     # DEBUG (optional)
     st.write("SECRET:", secret)

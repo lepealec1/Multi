@@ -92,9 +92,9 @@ with st.expander("Game", expanded=True):
     # -------------------------
     # READY
     # -------------------------
-    #elif state == "ready":
-        #Werewords.RenderRunGameButton(r, user, game_id)
-       # Werewords.RunGame(r, user, game_id)
+    elif state == "ready":
+        Werewords.RenderRunGameButton(r, user, game_id)
+        Werewords.RunGame(r, user, game_id)
 
     # -------------------------
     # WORD SELECTED
