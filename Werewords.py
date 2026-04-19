@@ -17,12 +17,12 @@ def get_role(r, game_id, user):
 # =========================
 def SelectMayor(r, user, game_id):
 
-    host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))
+    host_id = (r.get(f"game:{game_id}:host"))
     if user != host_id:
         return
 
     raw_players = r.smembers(f"game:{game_id}:players")
-    player_ids = [Functions.safe_decode(p) for p in raw_players]
+    player_ids = [(p) for p in raw_players]
 
     players = []
     id_to_name = {}
@@ -32,7 +32,7 @@ def SelectMayor(r, user, game_id):
         if not pid:
             continue
 
-        name = Functions.safe_decode(r.hget(f"user:{pid}", "name"))
+        name = (r.hget(f"user:{pid}", "name"))
 
         if not name:
             name = pid
@@ -62,39 +62,29 @@ def SelectMayor(r, user, game_id):
 # SETUP
 # =========================
 def StartSetup(r, user, game_id):
-
     host = (r.get(f"game:{game_id}:host"))
     st.write("StartSetup:Host:",host)
     if host != user:
         return
-
-    player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_ids = [(p) for p in r.smembers(f"game:{game_id}:players")]
     player_count = len(player_ids)
-
     if player_count < 3:
         st.warning("Need at least 3 players")
         return
-
     st.subheader("⚙ Setup Game")
-
     col1, col2 = st.columns(2)
     with col1:
         minutes = st.number_input("Minutes", 0, 60, 5, key=f"{game_id}_min")
     with col2:
         seconds = st.number_input("Seconds", 0, 59, 0, key=f"{game_id}_sec")
-
     seer = st.number_input("Seer", 0, player_count - 2, 1, key=f"{game_id}_seer")
     werewolves = st.number_input("Werewolves", 1, player_count - 3, 1, key=f"{game_id}_wolf")
-
     mayor = 1
     villagers = player_count - (mayor + seer + werewolves)
-
     if villagers < 0:
         st.error("Invalid role setup")
         return
-
     if st.button("Save Setup", key=f"{game_id}_save"):
-
         r.hset(f"game:{game_id}:settings", mapping={
             "timer_seconds": int(minutes * 60 + seconds),
             "seer": seer,
@@ -115,44 +105,34 @@ def RunGame(r, user, game_id):
     if not r.get(f"game:{game_id}:run_requested"):
         return
 
-    host = Functions.norm(r.get(f"game:{game_id}:host"))
+    host = r.get(f"game:{game_id}:host")
     if user != host:
         return
-
     r.delete(f"game:{game_id}:run_requested")
-
     r.set(f"game:{game_id}:state", "started")
-
-    # -------------------------
-    # PLAYERS
-    # -------------------------
-    player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
-
+    player_ids = [(p) for p in r.smembers(f"game:{game_id}:players")]
     if len(player_ids) < 3:
         return
-
     # -------------------------
     # SETTINGS
     # -------------------------
     settings = {
-        Functions.norm(k): Functions.norm(v)
+        (k):(v)
         for k, v in r.hgetall(f"game:{game_id}:settings").items()
     }
-
     seer = int(settings.get("seer", 0))
     werewolves = int(settings.get("werewolves", 0))
 
     # -------------------------
     # MAYOR
     # -------------------------
-    mayor_id = Functions.norm(r.get(f"game:{game_id}:mayor"))
+    mayor_id =(r.get(f"game:{game_id}:mayor"))
     if not mayor_id:
         st.error("Mayor not set")
         return
 
     player_ids = [p for p in player_ids if p != mayor_id]
     random.shuffle(player_ids)
-
     # -------------------------
     # ROLE ASSIGNMENT
     # -------------------------
@@ -173,8 +153,7 @@ def RunGame(r, user, game_id):
         roles[player_ids[i]] = "Villager"
 
     for pid, role in roles.items():
-        r.hset(f"game:{game_id}:roles", Functions.norm(pid), role)
-
+        r.hset(f"game:{game_id}:roles", (pid), role)
     # -------------------------
     # WORDS
     # -------------------------
@@ -191,8 +170,6 @@ def RunGame(r, user, game_id):
         r.rpush(f"game:{game_id}:mayor_words", w)
 
     st.rerun()
-
-
 # =========================
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
@@ -213,7 +190,7 @@ def MayorSelectWord(r, user, game_id):
     # WORDS
     # -------------------------
     words = [
-        Functions.norm(w)
+        (w)
         for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)
     ]
     st.subheader("👑 Pick Secret Word")
@@ -271,8 +248,8 @@ def RenderTimer(r, user, game_id):
     if not data:
         return
 
-    start = float(Functions.norm(data.get(b"start_time", 0)))
-    duration = int(Functions.norm(data.get(b"duration", 0)))
+    start = float((data.get(b"start_time", 0)))
+    duration = int((data.get(b"duration", 0)))
 
     remaining = int(duration - (time.time() - start))
 
