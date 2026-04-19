@@ -13,7 +13,11 @@ def RenderTimer(r, user, game_id):
 
     elapsed = time.time() - start
     remaining = int(duration - elapsed)
-
+    st.write(data)
+    st.write(start)
+    st.write(duration)
+    st.write(elapsed)
+    st.write(remaining)
     # -------------------------
     # TIME UP
     # -------------------------
