@@ -1,3 +1,4 @@
+import Functions
 import streamlit as st
 import time, uuid, redis
 import LobbyFunctions
@@ -58,8 +59,8 @@ LobbyFunctions.refresh_button()
 
 
 with st.expander("Game", expanded=True):
-    role = Werewords.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-    mode = Werewords.safe_decode(r.get(f"game:{game_id}:game_mode"))
+    role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
+    mode = Functions.safe_decode(r.get(f"game:{game_id}:game_mode"))
     st.write(role)
     st.write(mode)
     if mode != "Werewords":

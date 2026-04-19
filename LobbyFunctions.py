@@ -213,36 +213,25 @@ def view_lobbies(r):
 def refresh_button(label="🔄 Refresh"):
     if st.button(label):
         st.rerun()
-
 def SelectGame(r, user_id, game_id):
-    host_id = r.get(f"game:{game_id}:host")
 
-    if host_id is None:
-        return st.session_state.get("game_mode", "None")
+    host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))
 
-    if isinstance(host_id, bytes):
-        host_id = host_id.decode("utf-8")
-
-    # only host can change it
     if user_id != host_id:
-        return st.session_state.get("game_mode", "None")
+        return
 
     options = ["None", "Werewords"]
 
-    if "game_mode" not in st.session_state:
-        st.session_state.game_mode = "None"
+    current = Functions.safe_decode(r.get(f"game:{game_id}:mode")) or "None"
 
-    current = st.session_state.game_mode
-    if current not in options:
-        current = "None"
-
-    st.session_state.game_mode = st.radio(
+    mode = st.radio(
         "Select Game Mode",
         options,
-        index=options.index(current),
+        index=options.index(current) if current in options else 0,
         key=f"game_mode_{game_id}"
     )
 
-    return st.session_state.game_mode
-
-
+    if st.button("Set Game Mode"):
+        r.set(f"game:{game_id}:mode", mode)
+        st.success(f"Game mode set to {mode}")
+        st.rerun()

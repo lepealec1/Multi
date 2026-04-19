@@ -4,23 +4,13 @@ import uuid
 import time
 import random
 import os
-
-
-# =========================
-# REDIS + UTIL
-# =========================
-def safe_decode(x):
-    return x.decode() if isinstance(x, bytes) else x
-
-
-def norm(x):
-    return safe_decode(x).strip()
+import Functions
 
 
 def get_role(r, game_id, user_id):
     user_id = norm(user_id)
     raw = r.hget(f"game:{game_id}:roles", user_id)
-    return safe_decode(raw) if raw else None
+    return Functions.safe_decode(raw) if raw else None
 
 
 # =========================
@@ -39,7 +29,7 @@ def SelectMayor(r, user_id, game_id):
 
     for pid in player_ids:
         name = r.hget(f"user:{pid}", "name")
-        name = safe_decode(name)
+        name = Functions.safe_decode(name)
 
         if not name:
             name = pid
