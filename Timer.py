@@ -5,7 +5,12 @@ def RenderTimer(r, user, game_id):
     data = r.hgetall(f"game:{game_id}:timer")
     if not data:
         return
-    start = float(data[b"start_time"].decode())
+    raw_start = data.get(b"start_time")
+
+    if not raw_start:
+        start = 0
+    else:
+        start = float(raw_start.decode() if isinstance(raw_start, bytes) else raw_start)
     duration = int(data[b"duration"].decode())
 
     remaining = int(duration - (time.time() - start))
