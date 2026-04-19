@@ -100,8 +100,8 @@ with st.expander("Game", expanded=True):
     # -------------------------
     # WORD SELECTED
     # -------------------------
-    #elif state == "word_selected":
-        #Werewords.RevealRoles(r, user, game_id)
+    elif state == "word_selected":
+        Werewords.RevealRoles(r, user, game_id)
 
 
 

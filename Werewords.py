@@ -292,15 +292,9 @@ def RenderRunGameButton(r, user, game_id):
     state = (r.get(f"game:{game_id}:state"))
     host = (r.get(f"game:{game_id}:host"))
     secret = (r.get(f"game:{game_id}:secret_word")) or None
-
-    # DEBUG (optional)
-    st.write("SECRET:", secret)
-
-    # only host sees button
-    if host != user:
+    mayor = (r.get(f"game:{game_id}:mayor"))
+    if user != mayor:
         return
-
-    # better validation
     can_start = (
         state == "ready"
         and secret is not None
@@ -308,6 +302,5 @@ def RenderRunGameButton(r, user, game_id):
         and secret.lower() != "none"
     )
     if st.button("▶ Run Game", disabled=not can_start):
-
         r.set(f"game:{game_id}:run_requested", 1)
         st.rerun()
