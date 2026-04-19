@@ -8,10 +8,10 @@ import Functions
 
 
 def get_role(r, game_id, user_id):
-    user_id = Functions.norm(user_id)
-    raw = r.hget(f"game:{game_id}:roles", user_id)
-    return Functions.safe_decode(raw) if raw else None
 
+    raw = r.hget(f"game:{game_id}:roles", user_id)
+
+    return Functions.safe_decode(raw) if raw else None
 
 # =========================
 # MAYOR SELECTION
