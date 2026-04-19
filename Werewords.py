@@ -258,8 +258,7 @@ def RevealRoles(r, user, game_id):
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
-
-    role = get_role(r, game_id, user)
+    role = (r.get(f"game:{game_id}:role"))
     secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
 
     st.subheader("🎭 Role")
