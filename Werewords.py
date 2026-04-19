@@ -223,7 +223,6 @@ def RevealRoles(r, user, game_id):
         st.write("No role assigned")
         return
 
-    role = role.decode()
     st.write(f"Your role: {role}")
 
     # 👇 ONLY certain roles see the secret
