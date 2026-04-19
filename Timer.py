@@ -26,4 +26,4 @@ def Countdown(r, user, game_id):
         mins = remaining // 60
         secs = remaining % 60
         placeholder.write(f"⏱ {mins:02d}:{secs:02d}")
-        time.sleep(1)
+        time.sleep(10)
