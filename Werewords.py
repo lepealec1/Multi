@@ -173,33 +173,37 @@ def RevealRoles(r, user, game_id):
         }
     def get_werewolves(r, game_id):
         roles = get_roles(r, game_id)
-
         return [player for player, role in roles.items() if role == "Werewolf"]
     def get_seers(r, game_id):
         roles = get_roles(r, game_id)
-
         return [player for player, role in roles.items() if role == "Seer"]
+    def get_villagers(r, game_id):
+        roles = get_roles(r, game_id)
+        return [player for player, role in roles.items() if role == "Villager"]
     werewolves = get_werewolves(r, game_id)
     seers = get_seers(r, game_id)
+    villagers=get_villagers(r,game_id)
     if not role:
         st.write("No role assigned")
         return
     if role == "Werewolf":
         st.success("🐺🌕 You are a Werewolf.")
         if len(werewolves)==1:
-            st.success("You are the lone werewolf.")
+            st.warning("You are the lone werewolf.")
         if len(werewolves)>1:
-            st.success(f"🐺 These are all the werewolves: {', '.join(werewolves)}")
+            st.warning(f"🐺 These are all the werewolves: {', '.join(werewolves)}")
     elif role == "Seer":
         st.success("🔮👁 You are a seer.")
         if len(seers)==1:
-            st.success("You are the lone seer.")
+            st.warning("You are the lone seer.")
         if len(werewolves)>1:
-            st.success(f"🔮 These are all the seers: {', '.join(seers)}")
-    elif role == "Werewolf":
+            st.warning(f"🔮 These are all the seers: {', '.join(seers)}")
+    elif role == "Villager":
         st.success("🏡👤 You are a villager.")
+        st.warning("Including you, there are ",len(villagers)," villagers.")
     elif role == "Mayor":
         st.success("🏡👤🏡👤 You are the mayor")
+        st.warning("There are ",len(villagers)," villagers.")
 
 
     # 👇 ONLY certain roles see the secret
@@ -209,7 +213,9 @@ def RevealRoles(r, user, game_id):
             st.write(f"🔑 Secret word: {secret_word}")
         else:
             st.write("No secret set yet")
-
+    if role in ["Villager"]:
+        st.write("Try to guess the secret word")
+       
     st.write("Public: there are ",len(werewolves)," werewloves.")
              
 # =========================
