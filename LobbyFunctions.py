@@ -6,25 +6,59 @@ import streamlit as st
 import uuid
 def init_user(r):
 
-    name = st.text_input("Enter your name", value=st.session_state.get("name", ""))
+    if "name" not in st.session_state:
+        st.session_state.name = ""
+
+    # -------------------------
+    # INPUT
+    # -------------------------
+    name = st.text_input("Enter your name", value=st.session_state.name)
 
     if not name:
+        st.write("👤 Enter a name to continue")
         return None, None
 
-    # 🔥 DO NOT MODIFY NAME
     name = name.strip()
-
     st.session_state.name = name
-    st.session_state.user = name  # 👈 name is the ID
 
-    # store in redis as a hash
-    r.hset(f"user:{name}", mapping={
-        "name": name
-    })
+    user_id = name  # 👈 NAME IS THE ID
+
+    # -------------------------
+    # LOAD FROM REDIS
+    # -------------------------
+    existing = r.hget(f"user:{user_id}", "name")
+    existing = Functions.safe_decode(existing)
+
+    # if exists → load it
+    if existing:
+        st.session_state.user = user_id
+    else:
+        # create new user record
+        r.hset(f"user:{user_id}", mapping={
+            "name": name
+        })
+        st.session_state.user = user_id
+
+    # -------------------------
+    # UI CONTROLS
+    # -------------------------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("🔄 Reload User"):
+            # force re-read from Redis
+            st.session_state.user = name
+            st.rerun()
+
+    with col2:
+        if st.button("🆕 Switch Name"):
+            st.session_state.name = ""
+            st.session_state.user = None
+            st.rerun()
 
     st.write(f"👤 You are: **{name}**")
 
-    return name, name
+    return user_id, name
 
 
 def create_game(r, user):
