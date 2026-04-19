@@ -58,8 +58,6 @@ def SelectMayor(r, user_id, game_id):
 
     st.session_state[f"mayor_{game_id}"] = selected_name
 
-    return selected_id
-
 
 
 # =========================
