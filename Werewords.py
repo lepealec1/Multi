@@ -58,9 +58,7 @@ def SelectMayor(r, user, game_id):
         index=players.index(current) if current in players else 0,
         key=f"mayor_select_{game_id}"
     )
-
     r.set(f"game:{game_id}:mayor", selected_name)
-
     st.session_state[f"mayor_{game_id}"] = selected_name
 
 
@@ -290,3 +288,17 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
+
+###
+# Mayor Word Select + Pause Timer
+###
+def MayorSelectWord(r, user, game_id):
+    state = r.get(f"game:{game_id}:state")
+    if state != "word_selected":
+        return
+    mayor = r.get(f"game:{game_id}:mayor")
+    if user != mayor:
+        return
+    if st.button("Secret word discovered!", key=f"{game_id}_discovered"):
+        r.set(f"game:{game_id}:state", "paused")
+    st.rerun()
