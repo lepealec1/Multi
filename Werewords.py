@@ -8,7 +8,7 @@ import Functions
 
 
 def get_role(r, game_id, user_id):
-    user_id = norm(user_id)
+    user_id = Functions.norm(user_id)
     raw = r.hget(f"game:{game_id}:roles", user_id)
     return Functions.safe_decode(raw) if raw else None
 
@@ -18,11 +18,11 @@ def get_role(r, game_id, user_id):
 # =========================
 def SelectMayor(r, user_id, game_id):
 
-    host_id = norm(r.get(f"game:{game_id}:host"))
+    host_id = Functions.norm(r.get(f"game:{game_id}:host"))
     if user_id != host_id:
         return
 
-    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
 
     players = []
     id_to_name = {}
@@ -62,11 +62,11 @@ def SelectMayor(r, user_id, game_id):
 # =========================
 def StartSetup(r, user_id, game_id):
 
-    host = norm(r.get(f"game:{game_id}:host"))
+    host = Functions.norm(r.get(f"game:{game_id}:host"))
     if host != user_id:
         return
 
-    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
     player_count = len(player_ids)
 
     if player_count < 3:
@@ -112,7 +112,7 @@ def RunGame(r, user_id, game_id):
     if not r.get(f"game:{game_id}:run_requested"):
         return
 
-    host = norm(r.get(f"game:{game_id}:host"))
+    host = Functions.norm(r.get(f"game:{game_id}:host"))
     if user_id != host:
         return
 
@@ -123,7 +123,7 @@ def RunGame(r, user_id, game_id):
     # -------------------------
     # PLAYERS
     # -------------------------
-    player_ids = [norm(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_ids = [Functions.norm(p) for p in r.smembers(f"game:{game_id}:players")]
 
     if len(player_ids) < 4:
         return
@@ -132,7 +132,7 @@ def RunGame(r, user_id, game_id):
     # SETTINGS
     # -------------------------
     settings = {
-        norm(k): norm(v)
+        Functions.norm(k): Functions.norm(v)
         for k, v in r.hgetall(f"game:{game_id}:settings").items()
     }
 
@@ -142,7 +142,7 @@ def RunGame(r, user_id, game_id):
     # -------------------------
     # MAYOR
     # -------------------------
-    mayor_id = norm(r.get(f"game:{game_id}:mayor"))
+    mayor_id = Functions.norm(r.get(f"game:{game_id}:mayor"))
     if not mayor_id:
         st.error("Mayor not set")
         return
@@ -170,7 +170,7 @@ def RunGame(r, user_id, game_id):
         roles[player_ids[i]] = "Villager"
 
     for pid, role in roles.items():
-        r.hset(f"game:{game_id}:roles", norm(pid), role)
+        r.hset(f"game:{game_id}:roles", Functions.norm(pid), role)
 
     # -------------------------
     # WORDS
@@ -195,7 +195,7 @@ def RunGame(r, user_id, game_id):
 # =========================
 def MayorSelectWord(r, user_id, game_id):
     st.write("Select Word1")
-    state = norm(r.get(f"game:{game_id}:state"))
+    state = Functions.norm(r.get(f"game:{game_id}:state"))
     st.write("Select Word2")
     if state != "started":
         return
@@ -204,7 +204,7 @@ def MayorSelectWord(r, user_id, game_id):
     if role != "Mayor":
         return
     st.write("Select Word4")
-    words = [norm(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
+    words = [Functions.norm(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
 
     st.subheader("👑 Pick Secret Word")
 
@@ -239,12 +239,12 @@ def MayorSelectWord(r, user_id, game_id):
 # =========================
 def RevealRoles(r, user_id, game_id):
 
-    state = norm(r.get(f"game:{game_id}:state"))
+    state = Functions.norm(r.get(f"game:{game_id}:state"))
     if state != "word_selected":
         return
 
     role = get_role(r, game_id, user_id)
-    secret = norm(r.get(f"game:{game_id}:secret_word"))
+    secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
 
     st.subheader("🎭 Role")
 
@@ -277,8 +277,8 @@ def RenderTimer(r, user_id, game_id):
     if not data:
         return
 
-    start = float(norm(data.get(b"start_time", 0)))
-    duration = int(norm(data.get(b"duration", 0)))
+    start = float(Functions.norm(data.get(b"start_time", 0)))
+    duration = int(Functions.norm(data.get(b"duration", 0)))
 
     remaining = int(duration - (time.time() - start))
 
@@ -295,8 +295,8 @@ def RenderTimer(r, user_id, game_id):
 # =========================
 def RenderRunGameButton(r, user_id, game_id):
 
-    state = norm(r.get(f"game:{game_id}:state"))
-    host = norm(r.get(f"game:{game_id}:host"))
+    state = Functions.norm(r.get(f"game:{game_id}:state"))
+    host = Functions.norm(r.get(f"game:{game_id}:host"))
 
     if host != user_id:
         return
