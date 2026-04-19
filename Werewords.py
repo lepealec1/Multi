@@ -175,9 +175,12 @@ def RevealRoles(r, user, game_id):
         roles = get_roles(r, game_id)
 
         return [player for player, role in roles.items() if role == "Werewolf"]
+    def get_seers(r, game_id):
+        roles = get_roles(r, game_id)
+
+        return [player for player, role in roles.items() if role == "Seer"]
     werewolves = get_werewolves(r, game_id)
-    st.write(werewolves)
-     
+    seers = get_seers(r, game_id)
     if not role:
         st.write("No role assigned")
         return
@@ -189,6 +192,10 @@ def RevealRoles(r, user, game_id):
             st.success(f"🐺 These are all the werewolves: {', '.join(werewolves)}")
     elif role == "Seer":
         st.success("🔮👁 You are a seer.")
+        if len(seers)==1:
+            st.success("You are the lone seer.")
+        if len(werewolves)>1:
+            st.success(f"🔮 These are all the seers: {', '.join(seers)}")
     elif role == "Werewolf":
         st.success("🏡👤 You are a villager.")
     elif role == "Mayor":
@@ -203,6 +210,13 @@ def RevealRoles(r, user, game_id):
         else:
             st.write("No secret set yet")
 
+    player_ids = [(p) for p in r.smembers(f"game:{game_id}:players")]
+    player_count = len(player_ids)
+    villagers = player_count - (mayor + seer + werewolves)
+    players = list(r.smembers(f"game:{game_id}:players"))
+    seer_count = int(settings.get("seer", 0))
+    werewolf_count = int(settings.get("werewolves", 0))
+    st.write(f"There are {players} players: {villagers} villagers, {seer_count} seer, {werewolf_count} werewolf, and 1 mayor.)
 # =========================
 # TIMER
 # =========================
