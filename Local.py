@@ -65,7 +65,7 @@ with st.expander("Game", expanded=True):
     st.write("DECODED:", Functions.safe_decode(r.get(f"game:{game_id}:game_mode")))
     mode = Functions.safe_decode(r.get(f"game:{game_id}:mode")) or "None"
     st.write("Mode:",mode)
-    st.write(state)
+    st.write("State:",state)
 
     if mode != "Werewords":
         st.stop()
@@ -76,19 +76,19 @@ with st.expander("Game", expanded=True):
     if not state or state == "lobby":
         Werewords.SelectMayor(r, user_id, game_id)
         Werewords.StartSetup(r, user_id, game_id)
+    
 
     # -------------------------
     # READY
     # -------------------------
     elif state == "ready":
+        Werewords.MayorSelectWord(r, user_id, game_id)
         Werewords.RenderRunGameButton(r, user_id, game_id)
         Werewords.RunGame(r, user_id, game_id)
+        
     # -------------------------
     # STARTED
     # -------------------------
-    elif state == "started":
-        Werewords.MayorSelectWord(r, user_id, game_id)
-
 
     # -------------------------
     # WORD SELECTED

@@ -297,6 +297,7 @@ def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     host = Functions.norm(r.get(f"game:{game_id}:host"))
+    
     secret = Functions.norm(r.get(f"game:{game_id}:secret_word")) or None
 
     # DEBUG (optional)
