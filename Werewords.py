@@ -216,67 +216,50 @@ def MayorSelectWord(r, user, game_id):
         Functions.norm(w)
         for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)
     ]
-
     st.subheader("👑 Pick Secret Word")
-
     col1, col2 = st.columns(2)
-
     chosen = st.selectbox("Word", words)
-
     if col1.button("Lock Word"):
-
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
-
     if col2.button("Re-roll"):
-
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
-
         with open(WORDS_PATH, "r") as f:
             all_words = [w.strip() for w in f if w.strip()]
-
         new_words = random.sample(all_words, min(10, len(all_words)))
-
         r.delete(f"game:{game_id}:mayor_words")
         for w in new_words:
             r.rpush(f"game:{game_id}:mayor_words", w)
-
         st.rerun()
-
 # =========================
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):
-    st.write("RevealRoles")
-    state = (r.get(f"game:{game_id}:state"))
+    st.write("Revealig Roles")
+    state = r.get(f"game:{game_id}:state")
     if state != "word_selected":
         return
     role = (r.get(f"game:{game_id}:role"))
     st.write("RevealRoles Role:",role)
-    secret = Functions.norm(r.get(f"game:{game_id}:secret_word"))
-
+    secret = (r.get(f"game:{game_id}:secret_word"))
     st.subheader("🎭 Role")
-
     if not role:
         st.error("Role missing")
         return
-
     st.write(role)
-
     if role == "Seer":
         st.info("🔮 Seer Hint")
         st.write(secret)
-
     elif role == "Werewolf":
         st.warning("🐺 Werewolf")
-
+        st.write(secret)
     elif role == "Villager":
         st.success("👤 Villager")
-
     elif role == "Mayor":
-        st.error(f"SECRET (debug): {secret}")
+        st.write("Mayor")
+        st.write(secret)
 
 
 # =========================
