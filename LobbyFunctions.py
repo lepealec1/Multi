@@ -6,73 +6,27 @@ import streamlit as st
 import uuid
 def init_user(r):
 
-    if "user" not in st.session_state:
-        st.session_state.user = None
-
-    if "name" not in st.session_state:
-        st.session_state.name = ""
-
-    name = st.text_input("Enter your name", value=st.session_state.name)
+    name = st.text_input("Enter your name", value=st.session_state.get("name", ""))
 
     if not name:
-        user = st.session_state.user or "unknown"
-        st.write(f"👤 You are: **{user}**")
-        return user, user
+        return None, None
 
-    name = name.strip().lower()
+    # 🔥 DO NOT MODIFY NAME
+    name = name.strip()
+
     st.session_state.name = name
+    st.session_state.user = name  # 👈 name is the ID
 
-    # -------------------------
-    # LOAD EXISTING USER
-    # -------------------------
-    found_user_id = None
-
-    for key in r.keys("user:*"):
-        uid = key.split(":")[1]
-
-        stored_name = Functions.safe_decode(
-            r.hget(f"user:{uid}", "name")
-        )
-
-        if stored_name == name:
-            found_user_id = uid
-            break
-
-    # -------------------------
-    # ASSIGN USER
-    # -------------------------
-    if found_user_id:
-        user_id = found_user_id
-    else:
-        user_id = str(uuid.uuid4())[:8]
-
-    st.session_state.user = user_id
-
-    # -------------------------
-    # SAVE
-    # -------------------------
-    r.hset(f"user:{user_id}", mapping={
+    # store in redis as a hash
+    r.hset(f"user:{name}", mapping={
         "name": name
     })
 
-    # -------------------------
-    # UI CONTROLS
-    # -------------------------
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("🔄 Reload User"):
-            st.session_state.user = None
-            st.rerun()
-
-    with col2:
-        if st.button("🆕 New Identity"):
-            st.session_state.user = str(uuid.uuid4())[:8]
-            st.rerun()
-
     st.write(f"👤 You are: **{name}**")
 
-    return user_id, name
+    return name, name
+
+
 def create_game(r, user):
     st.subheader("Create Game")
 
