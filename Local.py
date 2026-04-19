@@ -99,29 +99,8 @@ with st.expander("Game", expanded=True):
     elif state == "word_selected":
 
         Werewords.RevealRoles(r, user, game_id)
+        Timer.Countdown(r, user, game_id)
 
-        timer_key = f"game:{game_id}:timer"
-
-        # -------------------------
-        # START TIMER ONLY ONCE
-        # -------------------------
-        if not r.exists(timer_key):
-
-            total_seconds = Timer.get_timer_seconds(r, game_id)
-
-            # safety check (ONLY during init)
-            if total_seconds <= 0:
-                st.error("Invalid timer setup")
-
-            r.hset(timer_key, mapping={
-                "start_time": str(time.time()),
-                "duration": str(total_seconds)
-            })
-
-        # -------------------------
-        # ALWAYS RENDER TIMER
-        # -------------------------
-        Timer.RenderTimer(r, user, game_id)
 
 
 LobbyFunctions.Reset(r,user,game_id)
