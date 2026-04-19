@@ -298,7 +298,7 @@ def RenderRunGameButton(r, user_id, game_id):
     state = Functions.norm(r.get(f"game:{game_id}:state"))
     #host = Functions.norm(r.get(f"game:{game_id}:host"))
     role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
-
+    st.write("RenderRunGameButton Role:",role)
     if role != "Mayor":
         return
 
