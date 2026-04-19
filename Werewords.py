@@ -200,10 +200,10 @@ def RevealRoles(r, user, game_id):
             st.warning(f"🔮 These are all the seers: {', '.join(seers)}")
     elif role == "Villager":
         st.success("🏡👤 You are a villager.")
-        st.warning("Including you, there are ",len(villagers)," villagers.")
+        st.warning(f"Including you, There are {len(villagers)} villagers.")
     elif role == "Mayor":
         st.success("🏡👤🏡👤 You are the mayor")
-        st.warning(f"There are ",len(villagers)," villagers.")
+        st.warning(f"There are {len(villagers)} villagers.")
 
 
     # 👇 ONLY certain roles see the secret
