@@ -227,12 +227,21 @@ def RevealRoles(r, user, game_id):
 
     # get role
     role = r.hget(f"game:{game_id}:roles", user)
-    werewolves = [
-        name.decode() if isinstance(name, bytes) else name
-        for name, role in r.hget(f"game:{game_id}:roles", user).items()
-        if (role.decode() if isinstance(role, bytes) else role) == "Werewolf"
-    ]
+    def get_roles(r, game_id):
+        roles = r.hgetall(f"game:{game_id}:roles")
 
+        return {
+            (k.decode() if isinstance(k, bytes) else k):
+            (v.decode() if isinstance(v, bytes) else v)
+            for k, v in roles.items()
+        }
+    def get_werewolves(r, game_id):
+        roles = get_roles(r, game_id)
+
+        return [player for player, role in roles.items() if role == "Werewolf"]
+    werewolves = get_werewolves(r, game_id)
+    st.write("🐺 Werewolves:", werewolves)
+     
     if not role:
         st.write("No role assigned")
         return
