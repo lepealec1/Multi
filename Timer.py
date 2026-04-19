@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-def timer(duration=300, key="timer"):
+def Countdown(duration=300, key="timer"):
 
     # -------------------------
     # set start time once
