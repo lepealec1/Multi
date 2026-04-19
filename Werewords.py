@@ -18,14 +18,11 @@ def get_role(r, game_id, user_id):
 # =========================
 def SelectMayor(r, user_id, game_id):
 
-    host_id = Functions.norm(r.get(f"game:{game_id}:host"))
+    host_id = Functions.safe_decode(r.get(f"game:{game_id}:host"))
 
     if user_id != host_id:
         return
 
-    # -------------------------
-    # PLAYERS (safe decode ONLY)
-    # -------------------------
     raw_players = r.smembers(f"game:{game_id}:players")
     player_ids = [Functions.safe_decode(p) for p in raw_players]
 
@@ -48,9 +45,6 @@ def SelectMayor(r, user_id, game_id):
     if not players:
         return
 
-    # -------------------------
-    # CURRENT SELECTION
-    # -------------------------
     current = st.session_state.get(f"mayor_{game_id}", players[0])
 
     selected_name = st.selectbox(
@@ -60,16 +54,14 @@ def SelectMayor(r, user_id, game_id):
         key=f"mayor_select_{game_id}"
     )
 
-    selected_id = id_to_name[selected_name]
+    selected_id = Functions.safe_decode(id_to_name[selected_name])
 
-    # -------------------------
-    # SAVE TO REDIS
-    # -------------------------
     r.set(f"game:{game_id}:mayor", selected_id)
 
     st.session_state[f"mayor_{game_id}"] = selected_name
 
     return selected_id
+
 
 
 # =========================
