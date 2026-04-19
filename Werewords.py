@@ -296,10 +296,10 @@ def RenderTimer(r, user_id, game_id):
 def RenderRunGameButton(r, user_id, game_id):
 
     state = Functions.norm(r.get(f"game:{game_id}:state"))
-    host = Functions.norm(r.get(f"game:{game_id}:host"))
-    role = Functions.norm(r.get(f"game:{game_id}:role"))
+    #host = Functions.norm(r.get(f"game:{game_id}:host"))
+    role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
 
-    if host != "Mayor":
+    if role != "Mayor":
         return
 
     if st.button("▶ Run Game", disabled=(state != "ready")):
