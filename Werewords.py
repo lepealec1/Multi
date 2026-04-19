@@ -292,7 +292,7 @@ def AssignRoles(r, user, game_id):
 ###
 # Mayor Word Select + Pause Timer
 ###
-def MayorSelectWord(r, user, game_id):
+def MayorButtons(r, user, game_id):
     state = r.get(f"game:{game_id}:state")
     if state != "word_selected":
         return
