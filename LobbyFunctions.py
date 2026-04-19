@@ -15,8 +15,8 @@ def init_user(r):
     name = st.text_input("Enter your name", value=st.session_state.name)
 
     if not name:
-        st.write("👤 Enter a name to continue")
-        return None, None
+        st.warning("👤 Enter a name to continue")
+        return
 
     name = name.strip()
     st.session_state.name = name

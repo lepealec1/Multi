@@ -210,30 +210,31 @@ def MayorSelectWord(r, user, game_id):
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):
-    st.write("Revealig Roles")
+    st.write("Revealing Roles")
+
     state = r.get(f"game:{game_id}:state")
     if state != "word_selected":
         return
-    role = (r.get(f"game:{game_id}:role"))
-    st.write("RevealRoles Role:",role)
-    secret = (r.get(f"game:{game_id}:secret_word"))
-    st.subheader("🎭 Role")
-    if not role:
-        st.error("Role missing")
-        return
-    st.write(role)
-    if role == "Seer":
-        st.success("🔮 Seer")
-        st.success(secret)
-    elif role == "Werewolf":
-        st.success("🐺 Werewolf")
-        st.success(secret)
-    elif role == "Villager":
-        st.success("👤 Villager")
-    elif role == "Mayor":
-        st.success("Mayor")
-        st.success(secret)
 
+    # get role
+    role = r.hget(f"game:{game_id}:roles", user)
+
+    if not role:
+        st.write("No role assigned")
+        return
+
+    role = role.decode()
+    st.write(f"Your role: {role}")
+
+    # 👇 ONLY certain roles see the secret
+    if role in ["Werewolf", "Seer", "Mayor"]:
+        secret = r.get(f"game:{game_id}:secret")
+
+        if secret:
+            secret = secret.decode()
+            st.write(f"🔑 Secret word: {secret}")
+        else:
+            st.write("No secret set yet")
 
 # =========================
 # TIMER
