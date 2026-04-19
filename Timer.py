@@ -11,7 +11,11 @@ def RenderTimer(r, user, game_id):
         start = 0
     else:
         start = float(raw_start.decode() if isinstance(raw_start, bytes) else raw_start)
-    duration = int(data[b"duration"].decode())
+    raw_duration = data.get(b"duration")
+    if not raw_duration:
+        duration = 0
+    else:
+        duration = int(raw_duration.decode() if isinstance(raw_duration, bytes) else raw_duration)
 
     remaining = int(duration - (time.time() - start))
 
