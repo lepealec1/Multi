@@ -33,18 +33,18 @@ def Countdown(r, user, game_id):
 def Countdown(r, user, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
     timer_seconds = int(settings.get("timer_seconds", 300))
+
     if "start_time" not in st.session_state:
         st.session_state.start_time = time.time()
-    placeholder = st.empty()  # 👈 only this part updates
-    raw_state = r.get(f"game:{game_id}:state")
-    state = Functions.safe_decode(raw_state)
-    if state != "word_selected":
-        return
-    state = Functions.safe_decode(raw_state)
-    while True and state=="word_selected":
-        st.write(f"⏱ {mins:02d}:{secs:02d}")
-        st.write(f"{remaining} seconds left")
+
+    placeholder = st.empty()
+
+    while True:
+        raw_state = r.get(f"game:{game_id}:state")
         state = Functions.safe_decode(raw_state)
+
+        if state != "word_selected":
+            break
 
         elapsed = time.time() - st.session_state.start_time
         remaining = int(timer_seconds - elapsed)
