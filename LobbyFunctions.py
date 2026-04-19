@@ -16,7 +16,7 @@ def init_user(r):
 
     if not name:
         st.warning("👤 Enter a name to continue")
-        return
+        return 0, 0
 
     name = name.strip()
     st.session_state.name = name

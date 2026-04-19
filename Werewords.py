@@ -240,7 +240,6 @@ def RevealRoles(r, user, game_id):
 
         return [player for player, role in roles.items() if role == "Werewolf"]
     werewolves = get_werewolves(r, game_id)
-    st.write("🐺 Werewolves:", werewolves)
      
     if not role:
         st.write("No role assigned")
