@@ -59,23 +59,15 @@ st.write(role)
 
 
 
-state = r.get(f"game:{game_id}:state")
-st.write("Game State:");
-st.write(state);
-
-state = r.get(f"game:{game_id}:role")
-st.write("role:");
-st.write(role);
 
 
 with st.expander("Game", expanded=True):
-    raw_state = r.get(f"game:{game_id}:state")
-    state = safe_decode(raw_state)
-
-    st.write("STATE:", state)
-
+    state = r.get(f"game:{game_id}:role")
+    st.write("STATE:")
+    st.write(state)
     mode = st.session_state.get("game_mode")
-
+    st.write("mode:")
+    st.write(mode)
     if mode != "Werewords":
         st.stop()
 
