@@ -210,13 +210,8 @@ def RevealRoles(r, user, game_id):
         else:
             st.write("No secret set yet")
 
-    player_ids = [(p) for p in r.smembers(f"game:{game_id}:players")]
-    player_count = len(player_ids)
-    villagers = player_count - (mayor + seer + werewolves)
-    players = list(r.smembers(f"game:{game_id}:players"))
-    seer_count = int(settings.get("seer", 0))
-    werewolf_count = int(settings.get("werewolves", 0))
-    st.write(f"There are {players} players: {villagers} villagers, {seer_count} seer, {werewolf_count} werewolf, and 1 mayor.)
+    st.write("Public: there are ".len(werewolves)," werewloves.")
+             
 # =========================
 # TIMER
 # =========================
