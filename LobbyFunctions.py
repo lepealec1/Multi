@@ -234,3 +234,21 @@ def SelectGame(r, user, game_id):
         r.set(f"game:{game_id}:mode", "Werewords")
         st.success("Game mode set to Werewords")
         st.rerun()
+
+
+def reset_roles_button(r, user, game_id):
+    host_id = r.get(f"game:{game_id}:host")
+
+    # only host can reset
+    if user != host_id:
+        return
+
+    if st.button("🔄 Reset Roles"):
+        r.delete(f"game:{game_id}:roles_assigned")
+        r.delete(f"game:{game_id}:roles_lock")   # if using lock
+        r.delete(f"game:{game_id}:roles")
+
+        st.success("Roles reset!")
+        r.set(f"game:{game_id}:state", "lobby")
+        st.rerun()
+                

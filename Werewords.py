@@ -223,16 +223,16 @@ def RevealRoles(r, user, game_id):
         return
     st.write(role)
     if role == "Seer":
-        st.info("🔮 Seer Hint")
-        st.write(secret)
+        st.success("🔮 Seer")
+        st.success(secret)
     elif role == "Werewolf":
-        st.warning("🐺 Werewolf")
-        st.write(secret)
+        st.success("🐺 Werewolf")
+        st.success(secret)
     elif role == "Villager":
         st.success("👤 Villager")
     elif role == "Mayor":
-        st.write("Mayor")
-        st.write(secret)
+        st.success("Mayor")
+        st.success(secret)
 
 
 # =========================
@@ -277,14 +277,10 @@ def RenderRunGameButton(r, user, game_id):
         st.rerun()
 
 
-import random
-import streamlit as st
 
 def AssignRoles(r, user, game_id):
-    st.write("assigning roles")
-
-    host_id = r.get(f"game:{game_id}:host")
-    if user != host_id:
+    host = r.get(f"game:{game_id}:host")
+    if user != host:
         return
 
     # -------------------------
