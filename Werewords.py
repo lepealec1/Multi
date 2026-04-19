@@ -263,7 +263,6 @@ def RenderTimer(r, user, game_id):
 def RenderRunGameButton(r, user, game_id):
 
     state = (r.get(f"game:{game_id}:state"))
-    host = (r.get(f"game:{game_id}:host"))
     secret = (r.get(f"game:{game_id}:secret_word")) or None
     mayor = (r.get(f"game:{game_id}:mayor"))
     if user != mayor:
@@ -280,16 +279,16 @@ def RenderRunGameButton(r, user, game_id):
 
 
 def AssignRoles(r, user, game_id):
+    st.write("assigning roles")
     host_id = (r.get(f"game:{game_id}:host"))
     if user != host_id:
         return
-
     # -------------------------
     # LOAD SETTINGS
     # -------------------------
     settings = r.hgetall(f"game:{game_id}:settings")
     settings = {
-        Functions.safe_decode(k): Functions.safe_decode(v)
+        (k):(v)
         for k, v in settings.items()
     }
 
@@ -299,7 +298,7 @@ def AssignRoles(r, user, game_id):
     # -------------------------
     # LOAD PLAYERS (NAMES)
     # -------------------------
-    mayor = Functions.safe_decode(r.get(f"game:{game_id}:mayor"))
+    mayor =(r.get(f"game:{game_id}:mayor"))
     players = r.smembers(f"game:{game_id}:players")
     players = [p for p in players if p != mayor]
     if len(players) < 4:

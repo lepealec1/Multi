@@ -94,7 +94,7 @@ with st.expander("Game", expanded=True):
     # -------------------------
     elif state == "ready":
         Werewords.MayorSelectWord(r,user,game_id)
-        Werewords.RenderRunGameButton(r, user, game_id)
+        #Werewords.RenderRunGameButton(r, user, game_id)
         #Werewords.RunGame(r, user, game_id)
 
     # -------------------------
