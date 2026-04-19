@@ -112,7 +112,6 @@ with st.expander("Game", expanded=True):
             # safety check (ONLY during init)
             if total_seconds <= 0:
                 st.error("Invalid timer setup")
-                return
 
             r.hset(timer_key, mapping={
                 "start_time": str(time.time()),
