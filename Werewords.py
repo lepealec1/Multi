@@ -208,25 +208,30 @@ def RunGame(r, user_id, game_id):
 
 # =========================
 # MAYOR WORD PICK
-# =========================
 def MayorSelectWord(r, user_id, game_id):
-    st.write("Select Word1")
+
     state = Functions.norm(r.get(f"game:{game_id}:state"))
-    st.write("Select Word2")
+    st.write("STATE:", state)
+
     if state != "ready":
         return
-    st.write("Select Word3")
-    role = Functions.norm(r.get(f"game:{game_id}:role"))
-    st.write("Role1:",role)
 
-    role = Functions.safe_decode(r.get(f"game:{game_id}:role"))
-    st.write("Role2:",role)
+    # -------------------------
+    # GET ROLE (CORRECT WAY)
+    # -------------------------
     role = get_role(r, game_id, user_id)
-    st.write("Role3:",role)
+    st.write("ROLE:", role)
+
     if role != "Mayor":
         return
-    st.write("Select Word4")
-    words = [Functions.norm(w) for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)]
+
+    # -------------------------
+    # WORDS
+    # -------------------------
+    words = [
+        Functions.norm(w)
+        for w in r.lrange(f"game:{game_id}:mayor_words", 0, -1)
+    ]
 
     st.subheader("👑 Pick Secret Word")
 
@@ -235,6 +240,7 @@ def MayorSelectWord(r, user_id, game_id):
     chosen = st.selectbox("Word", words)
 
     if col1.button("Lock Word"):
+
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
@@ -254,7 +260,6 @@ def MayorSelectWord(r, user_id, game_id):
             r.rpush(f"game:{game_id}:mayor_words", w)
 
         st.rerun()
-
 
 # =========================
 # REVEAL ROLES
