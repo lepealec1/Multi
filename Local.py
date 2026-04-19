@@ -63,8 +63,11 @@ with st.expander("Game", expanded=True):
     mode = Functions.safe_decode(r.get(f"game:{game_id}:game_mode"))
     state = Functions.safe_decode(r.get(f"game:{game_id}:state"))
     st.write(role)
+    st.write("RAW:", r.get(f"game:{game_id}:game_mode"))
+    st.write("DECODED:", Functions.safe_decode(r.get(f"game:{game_id}:game_mode")))
     st.write(mode)
     st.write(state)
+
     if mode != "Werewords":
         st.stop()
 
