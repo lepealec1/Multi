@@ -99,7 +99,7 @@ with st.expander("Game", expanded=True):
     elif state == "word_selected":
         Werewords.RevealRoles(r, user, game_id)
         Werewords.MayorButtons(r,user,game_id)
-        Timer.Countdown(r, user, game_id)
+        Timer.Countdown()
     elif state=="discovered":
         Werewords.Discovered(r,user,game_id)
     elif state=="times_up":
