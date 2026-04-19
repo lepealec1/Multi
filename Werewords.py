@@ -6,6 +6,9 @@ import random
 import os
 import Functions
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WORDS_PATH = os.path.join(BASE_DIR, "Words.txt")
+
 def load_words():
     with open(WORDS_PATH, "r") as f:
         return [w.strip() for w in f if w.strip()]
