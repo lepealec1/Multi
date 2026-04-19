@@ -210,7 +210,7 @@ def RevealRoles(r, user, game_id):
         else:
             st.write("No secret set yet")
 
-    st.write("Public: there are ".len(werewolves)," werewloves.")
+    st.write("Public: there are ",len(werewolves)," werewloves.")
              
 # =========================
 # TIMER
