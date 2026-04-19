@@ -203,7 +203,7 @@ def RevealRoles(r, user, game_id):
         st.warning("Including you, there are ",len(villagers)," villagers.")
     elif role == "Mayor":
         st.success("🏡👤🏡👤 You are the mayor")
-        st.warning("There are ",len(villagers)," villagers.")
+        st.warning(f"There are ",len(villagers)," villagers.")
 
 
     # 👇 ONLY certain roles see the secret
@@ -216,7 +216,7 @@ def RevealRoles(r, user, game_id):
     if role in ["Villager"]:
         st.write("Try to guess the secret word")
        
-    st.write("Public: there are ",len(werewolves)," werewloves.")
+    st.write(f"Public: there are ",len(werewolves)," werewloves.")
              
 # =========================
 # TIMER
