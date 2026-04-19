@@ -114,7 +114,6 @@ def StartSetup(r, user, game_id):
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
     state = r.get(f"game:{game_id}:state")
-    st.write("MayorSelectWord STATE:", state)
 
     if state != "ready":
         return
