@@ -28,7 +28,8 @@ def Countdown(r, user, game_id):
     if state == "word_selected":
         st.subheader(f"⏱ {mins:02d}:{secs:02d}")
         st.caption(f"{remaining} seconds left")
-
+    st.autorefresh(interval=1000, key="timer_refresh")
+    
 def RenderTimer(r, user, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
     st.write(settings)
