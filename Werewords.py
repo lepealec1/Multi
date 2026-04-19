@@ -223,7 +223,7 @@ def RevealRoles(r, user, game_id):
 def RenderTimer(r, user, game_id):
 
     data = r.hgetall(f"game:{game_id}:timer")
-    st.write("RenderTimer:" data)
+    st.write("RenderTimer:",data)
     if not data:
         return
 
@@ -236,6 +236,7 @@ def RenderTimer(r, user, game_id):
     duration = int(decode(data.get(b"duration")))
 
     remaining = int(duration - (time.time() - start))
+
     if remaining <= 0:
         r.set(f"game:{game_id}:state", "ended")
         st.warning("⏰ Time up!")
