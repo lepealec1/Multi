@@ -2,29 +2,36 @@ import time
 import streamlit as st
 
 def RenderTimer(r, user, game_id):
+
     data = r.hgetall(f"game:{game_id}:timer")
+
     if not data:
         return
-    raw_start = data.get(b"start_time")
 
-    if not raw_start:
-        start = 0
-    else:
-        start = float(raw_start.decode() if isinstance(raw_start, bytes) else raw_start)
-    raw_duration = data.get(b"duration")
-    if not raw_duration:
-        duration = 0
-    else:
-        duration = int(raw_duration.decode() if isinstance(raw_duration, bytes) else raw_duration)
+    start = float(data.get(b"start_time", b"0").decode())
+    duration = int(data.get(b"duration", b"0").decode())
 
-    remaining = int(duration - (time.time() - start))
+    elapsed = time.time() - start
+    remaining = int(duration - elapsed)
 
+    # -------------------------
+    # TIME UP
+    # -------------------------
     if remaining <= 0:
         r.set(f"game:{game_id}:state", "ended")
         st.warning("⏰ Time up!")
         return
 
-    st.subheader(f"⏱ {remaining//60:02d}:{remaining%60:02d}")
+    # -------------------------
+    # FORMAT TIME
+    # -------------------------
+    mins = remaining // 60
+    secs = remaining % 60
+
+    st.subheader(f"⏱ {mins:02d}:{secs:02d}")
+
+    # optional debug
+    st.caption(f"Time remaining: {remaining} seconds")
     
 def get_timer_seconds(r, game_id):
     settings = r.hgetall(f"game:{game_id}:settings")
