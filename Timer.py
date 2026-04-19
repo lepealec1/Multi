@@ -9,16 +9,16 @@ def Countdown(r, user, game_id):
     #timer_seconds = int(settings.get("timer_seconds", 0))
     timer_seconds=300
     st.write(timer_seconds)
-
+    st.write(elapsed)
     duration = timer_seconds 
-
+    
     elapsed = time.time() - st.session_state.start_time
     remaining = int(duration - elapsed)
 
     if remaining <= 0:
         st.warning("⏰ Time up!")
-        r.set(f"game:{game_id}:state", "times_up")
-        st.rerun()
+        #r.set(f"game:{game_id}:state", "times_up")
+#        st.rerun()
         return
 
     mins = remaining // 60
