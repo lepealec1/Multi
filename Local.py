@@ -61,6 +61,7 @@ LobbyFunctions.refresh_button()
 with st.expander("Game", expanded=True):
     role = Functions.safe_decode(r.hget(f"game:{game_id}:roles", user_id))
     mode = Functions.safe_decode(r.get(f"game:{game_id}:game_mode"))
+    state = Functions.safe_decode(r.get(f"game:{game_id}:state"))
     st.write(role)
     st.write(mode)
     if mode != "Werewords":
