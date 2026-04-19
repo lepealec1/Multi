@@ -261,7 +261,6 @@ def RenderTimer(r, user, game_id):
 # RUN BUTTON
 # =========================
 def RenderRunGameButton(r, user, game_id):
-
     state = (r.get(f"game:{game_id}:state"))
     secret = (r.get(f"game:{game_id}:secret_word")) or None
     mayor = (r.get(f"game:{game_id}:mayor"))
@@ -278,30 +277,35 @@ def RenderRunGameButton(r, user, game_id):
         st.rerun()
 
 
+import random
+import streamlit as st
+
 def AssignRoles(r, user, game_id):
     st.write("assigning roles")
-    host_id = (r.get(f"game:{game_id}:host"))
+
+    host_id = r.get(f"game:{game_id}:host")
     if user != host_id:
         return
+
     # -------------------------
     # LOAD SETTINGS
     # -------------------------
     settings = r.hgetall(f"game:{game_id}:settings")
-    settings = {
-        (k):(v)
-        for k, v in settings.items()
-    }
+    settings = {k: v for k, v in settings.items()}
 
     seer_count = int(settings.get("seer", 0))
     werewolf_count = int(settings.get("werewolves", 0))
 
     # -------------------------
-    # LOAD PLAYERS (NAMES)
+    # LOAD PLAYERS
     # -------------------------
-    mayor =(r.get(f"game:{game_id}:mayor"))
-    players = r.smembers(f"game:{game_id}:players")
+    mayor = r.get(f"game:{game_id}:mayor")
+    players = list(r.smembers(f"game:{game_id}:players"))
+
+    # remove mayor from pool
     players = [p for p in players if p != mayor]
-    if len(players) < 4:
+
+    if len(players) + 1 < 4:  # include mayor
         return "Not enough players"
 
     random.shuffle(players)
@@ -309,12 +313,11 @@ def AssignRoles(r, user, game_id):
     roles = {}
 
     # -------------------------
-    # MAYOR (FIRST PLAYER)
+    # KEEP ORIGINAL MAYOR
     # -------------------------
-    mayor = players[0]
     roles[mayor] = "Mayor"
 
-    idx = 1
+    idx = 0
 
     # -------------------------
     # SEER
@@ -346,4 +349,4 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
-    return roles
+    st.rerun()
