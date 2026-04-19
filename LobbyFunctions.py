@@ -236,7 +236,7 @@ def SelectGame(r, user, game_id):
         st.rerun()
 
 
-def reset_roles_button(r, user, game_id):
+def Reset(r, user, game_id):
     host_id = r.get(f"game:{game_id}:host")
 
     # only host can reset
@@ -247,7 +247,6 @@ def reset_roles_button(r, user, game_id):
         r.delete(f"game:{game_id}:roles_assigned")
         r.delete(f"game:{game_id}:roles_lock")   # if using lock
         r.delete(f"game:{game_id}:roles")
-
         st.success("Roles reset!")
         r.set(f"game:{game_id}:state", "lobby")
         st.rerun()
