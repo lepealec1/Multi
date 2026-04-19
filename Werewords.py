@@ -288,6 +288,7 @@ def AssignRoles(r, user, game_id):
     for name, role in roles.items():
         r.hset(f"game:{game_id}:roles", name, role)
 
+def
 
 ###
 # Mayor Word Select + Pause Timer
@@ -301,4 +302,8 @@ def MayorButtons(r, user, game_id):
         return
     if st.button("Secret word discovered!", key=f"{game_id}_discovered"):
         r.set(f"game:{game_id}:state", "paused")
+        secret_word = r.get(f"game:{game_id}:secret_word")
+        st.warning("Secrete word discovered.")
+        st.warning("Werewolves vote to discover the seer.")
+        st.warning(f"Secret word:",secret_word)
     st.rerun()
