@@ -93,6 +93,7 @@ with st.expander("Game", expanded=True):
     # READY
     # -------------------------
     elif state == "ready":
+        Werewords.AssignRoles(r,user ,game_id)
         Werewords.MayorSelectWord(r,user,game_id)
         #Werewords.RenderRunGameButton(r, user, game_id)
         #Werewords.RunGame(r, user, game_id)
@@ -101,7 +102,6 @@ with st.expander("Game", expanded=True):
     # WORD SELECTED
     # -------------------------
     elif state == "word_selected":
-        Werewords.AssignRoles(r,user ,game_id)
         Werewords.RevealRoles(r, user, game_id)
 
 
