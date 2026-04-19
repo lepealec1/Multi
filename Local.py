@@ -60,7 +60,6 @@ with st.expander("Game", expanded=True):
     raw_state = r.get(f"game:{game_id}:state")
     state = Functions.safe_decode(raw_state)
 
-    st.write("STATE:", state)
 
     # -------------------------
     # MODE (ONLY ONE KEY!)
@@ -68,7 +67,7 @@ with st.expander("Game", expanded=True):
     raw_mode = r.get(f"game:{game_id}:mode")
     mode = Functions.safe_decode(raw_mode) or "None"
 
-    st.write("MODE:", mode)
+
 
     # HARD STOP IF NOT GAME MODE
     if mode != "Werewords":
@@ -77,10 +76,7 @@ with st.expander("Game", expanded=True):
     # -------------------------
     # ROLE DEBUG
     # -------------------------
-    raw_role = r.hget(f"game:{game_id}:roles", user)
-    role = Functions.safe_decode(raw_role)
 
-    st.write("ROLE:", role)
 
     # -------------------------
     # LOBBY

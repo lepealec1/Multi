@@ -220,7 +220,6 @@ def MayorSelectWord(r, user, game_id):
 # REVEAL ROLES
 # =========================
 def RevealRoles(r, user, game_id):
-    st.write("Revealing Roles")
 
     state = r.get(f"game:{game_id}:state")
     if state != "word_selected":
@@ -228,17 +227,25 @@ def RevealRoles(r, user, game_id):
 
     # get role
     role = r.hget(f"game:{game_id}:roles", user)
+    werewolves = [
+        name.decode() if isinstance(name, bytes) else name
+        for name, role in r.hget(f"game:{game_id}:roles", user).items()
+        if (role.decode() if isinstance(role, bytes) else role) == "Werewolf"
+    ]
 
     if not role:
         st.write("No role assigned")
         return
-
-    st.write(f"Your role: {role}")
-
+    if role == "Werewolf":
+        st.success("🐺🌕 You are a Werewolf.")
+        st.success(f"These are all the werewlves:",werewolves)
+    elif role == "Seer":
+        st.success("🔮👁 You are a seer.")
+    elif role == "Werewolf":
+        st.success("🏡👤 You are a villager.")
     # 👇 ONLY certain roles see the secret
     if role in ["Werewolf", "Seer", "Mayor"]:
         secret_word = r.get(f"game:{game_id}:secret_word")
-
         if secret_word:
             st.write(f"🔑 Secret word: {secret_word}")
         else:
