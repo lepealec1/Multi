@@ -4,57 +4,63 @@ import Functions
 
 import streamlit as st
 import uuid
-
 def init_user(r):
 
     # --- SESSION USER ID ---
     if "user" not in st.session_state:
         st.session_state.user = None
 
-    # --- NAME INPUT ---
-    name = st.text_input("Enter your name", value=st.session_state.get("name", ""))
+    if "name" not in st.session_state:
+        st.session_state.name = ""
 
-    if name:
-        name = name.strip()
-        st.session_state.name = name
+    # --- INPUT ---
+    name = st.text_input("Enter your name", value=st.session_state.name)
 
-        # 🔍 LOOK FOR EXISTING USER WITH THIS NAME
-        keys = r.keys("user:*")
+    if not name:
+        user = st.session_state.user or "unknown"
+        st.write(f"👤 You are: **{user}**")
+        return user, user
 
-        found_user_id = None
+    name = name.strip()
+    st.session_state.name = name
 
-        for key in keys:
-            user = key.split(":")[1]
+    # --- SEARCH EXISTING USER BY NAME ---
+    found_user_id = None
 
-            stored_name = r.hget(f"user:{user}", "name")
-            #stored_name = stored_name.decode() if isinstance(stored_name, bytes) else stored_name
+    for key in r.keys("user:*"):
+        user_id = key.split(":")[1]
 
-            if stored_name == name:
-                found_user_id = user
-                break
+        stored_name = Functions.safe_decode(
+            r.hget(f"user:{user_id}", "name")
+        )
 
-        # ✅ EXISTING USER → LOAD IT
-        if found_user_id:
-            st.session_state.user = found_user_id
+        if stored_name == name:
+            found_user_id = user_id
+            break
 
-        # 🆕 NEW USER → CREATE IT
-        else:
-            new_id = str(uuid.uuid4())[:8]
-            st.session_state.user = new_id
+    # --- LOAD OR CREATE ---
+    if found_user_id:
+        user_id = found_user_id
+        st.session_state.user = user_id
 
-            r.hset(f"user:{new_id}", mapping={
-                "name": name
-            })
+    else:
+        user_id = str(uuid.uuid4())[:8]
+        st.session_state.user = user_id
 
-    # fallback display id
-    user = st.session_state.user or "unknown"
+    # --- ALWAYS SAVE (overwrite/update allowed) ---
+    r.hset(f"user:{user_id}", mapping={
+        "name": name
+    })
 
-    display_name = st.session_state.name.strip() if st.session_state.name else user
+    st.write(f"👤 You are: **{name}**")
 
-    st.write(f"👤 You are: **{display_name}**")
+    # --- OPTIONAL: RELOAD BUTTON ---
+    if st.button("🔄 Reload User"):
+        st.session_state.user = None
+        st.session_state.name = ""
+        st.rerun()
 
-    return user, display_name
-
+    return user_id, name
 
 def create_game(r, user):
     st.subheader("Create Game")
