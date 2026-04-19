@@ -100,7 +100,6 @@ def StartSetup(r, user, game_id):
 # MAYOR WORD PICK
 def MayorSelectWord(r, user, game_id):
     state = (r.get(f"game:{game_id}:state"))
-    st.write("MayorSelectWord STATE:", state)
 
     if state != "ready":
         return
@@ -108,7 +107,6 @@ def MayorSelectWord(r, user, game_id):
     # GET ROLE (CORRECT WAY)
     # -------------------------
     mayor = (r.get(f"game:{game_id}:mayor"))
-    st.write("RevealRoles Role:",mayor)
     if user != mayor:
         return
     # -------------------------
@@ -122,7 +120,7 @@ def MayorSelectWord(r, user, game_id):
     
     col1, col2 = st.columns(2)
     chosen = st.selectbox("Word", words)
-    if col1.button("Lock Word"):
+    if col1.button("Lock Word and Run Game"):
         r.set(f"game:{game_id}:secret_word", chosen)
         r.set(f"game:{game_id}:state", "word_selected")
         st.rerun()
